@@ -1,1 +1,1127 @@
 
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>نظام إدارة الموظفين</title>
+
+<style>
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+  font-family:Arial,Tahoma,sans-serif;
+}
+
+body{
+  background:#f3f6fa;
+  color:#172033;
+}
+
+header{
+  background:#16243a;
+  color:white;
+  padding:18px;
+  text-align:center;
+}
+
+header h1{
+  font-size:24px;
+  margin-bottom:6px;
+}
+
+header p{
+  color:#cbd5e1;
+}
+
+.container{
+  width:95%;
+  max-width:1200px;
+  margin:20px auto;
+}
+
+.cards{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:15px;
+  margin-bottom:20px;
+}
+
+.card{
+  background:white;
+  padding:20px;
+  border-radius:14px;
+  box-shadow:0 3px 12px rgba(0,0,0,.07);
+}
+
+.card h3{
+  color:#64748b;
+  font-size:15px;
+  margin-bottom:10px;
+}
+
+.card strong{
+  font-size:27px;
+}
+
+.tabs{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-bottom:15px;
+}
+
+.tabs button,
+button{
+  border:0;
+  border-radius:8px;
+  padding:11px 16px;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+.tabs button{
+  background:#dbe4ef;
+  color:#172033;
+}
+
+.tabs button.active{
+  background:#16243a;
+  color:white;
+}
+
+.section{
+  display:none;
+}
+
+.section.active{
+  display:block;
+}
+
+.box{
+  background:white;
+  padding:20px;
+  border-radius:14px;
+  box-shadow:0 3px 12px rgba(0,0,0,.07);
+  margin-bottom:20px;
+}
+
+.box h2{
+  margin-bottom:15px;
+}
+
+.form-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+}
+
+input,select{
+  width:100%;
+  padding:12px;
+  border:1px solid #d5dce5;
+  border-radius:8px;
+  outline:none;
+  background:white;
+}
+
+input:focus,select:focus{
+  border-color:#334155;
+}
+
+.primary{
+  background:#16243a;
+  color:white;
+}
+
+.success{
+  background:#198754;
+  color:white;
+}
+
+.danger{
+  background:#dc3545;
+  color:white;
+}
+
+.warning{
+  background:#f59e0b;
+  color:white;
+}
+
+.secondary{
+  background:#64748b;
+  color:white;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:15px;
+}
+
+th,td{
+  padding:12px 8px;
+  border-bottom:1px solid #e5e7eb;
+  text-align:right;
+}
+
+th{
+  background:#f1f5f9;
+}
+
+.badge{
+  display:inline-block;
+  padding:5px 9px;
+  border-radius:20px;
+  font-size:12px;
+  font-weight:bold;
+}
+
+.present{
+  background:#dcfce7;
+  color:#166534;
+}
+
+.absent{
+  background:#fee2e2;
+  color:#991b1b;
+}
+
+.small{
+  font-size:13px;
+  color:#64748b;
+}
+
+.actions{
+  display:flex;
+  gap:5px;
+  flex-wrap:wrap;
+}
+
+.empty{
+  text-align:center;
+  padding:25px;
+  color:#64748b;
+}
+
+.modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.5);
+  z-index:10;
+  align-items:center;
+  justify-content:center;
+  padding:15px;
+}
+
+.modal-content{
+  background:white;
+  width:100%;
+  max-width:600px;
+  border-radius:15px;
+  padding:20px;
+  max-height:90vh;
+  overflow:auto;
+}
+
+.modal-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:15px;
+}
+
+.close{
+  background:#e5e7eb;
+  font-size:20px;
+}
+
+.salary-result{
+  background:#eef6ff;
+  padding:15px;
+  border-radius:10px;
+  margin-top:15px;
+}
+
+footer{
+  text-align:center;
+  padding:25px;
+  color:#64748b;
+}
+
+@media(max-width:800px){
+  .cards{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .form-grid{
+    grid-template-columns:1fr;
+  }
+
+  table{
+    font-size:13px;
+  }
+
+  .table-wrap{
+    overflow-x:auto;
+  }
+}
+
+@media(max-width:500px){
+  .cards{
+    grid-template-columns:1fr;
+  }
+
+  header h1{
+    font-size:20px;
+  }
+
+  .container{
+    width:92%;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>نظام إدارة الموظفين</h1>
+  <p>إدارة الموظفين والحضور والرواتب</p>
+</header>
+
+<div class="container">
+
+  <div class="cards">
+    <div class="card">
+      <h3>إجمالي الموظفين</h3>
+      <strong id="totalEmployees">0</strong>
+    </div>
+
+    <div class="card">
+      <h3>حضور اليوم</h3>
+      <strong id="todayPresent">0</strong>
+    </div>
+
+    <div class="card">
+      <h3>غياب اليوم</h3>
+      <strong id="todayAbsent">0</strong>
+    </div>
+
+    <div class="card">
+      <h3>إجمالي الرواتب</h3>
+      <strong id="totalSalaries">0</strong>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="active" onclick="showSection('dashboard',this)">الرئيسية</button>
+    <button onclick="showSection('employees',this)">الموظفون</button>
+    <button onclick="showSection('attendance',this)">الحضور والانصراف</button>
+    <button onclick="showSection('salaries',this)">الرواتب</button>
+  </div>
+
+  <!-- الرئيسية -->
+  <section id="dashboard" class="section active">
+
+    <div class="box">
+      <h2>مرحبًا بك</h2>
+      <p class="small">
+        هذه نسخة تجريبية من نظام إدارة الموظفين.
+        يمكنك إضافة الموظفين وتسجيل الحضور وحساب الرواتب.
+      </p>
+    </div>
+
+    <div class="box">
+      <h2>آخر سجلات الحضور</h2>
+      <div id="recentAttendance"></div>
+    </div>
+
+  </section>
+
+  <!-- الموظفون -->
+  <section id="employees" class="section">
+
+    <div class="box">
+
+      <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;">
+        <h2>الموظفون</h2>
+
+        <button class="primary" onclick="openEmployeeModal()">
+          + إضافة موظف
+        </button>
+      </div>
+
+      <br>
+
+      <input
+        id="employeeSearch"
+        type="text"
+        placeholder="ابحث بالاسم أو رقم الموظف..."
+        oninput="renderEmployees()"
+      >
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>الرقم</th>
+              <th>الاسم</th>
+              <th>القسم</th>
+              <th>الوظيفة</th>
+              <th>الراتب</th>
+              <th>الإجراءات</th>
+            </tr>
+          </thead>
+
+          <tbody id="employeesTable"></tbody>
+        </table>
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- الحضور -->
+  <section id="attendance" class="section">
+
+    <div class="box">
+
+      <h2>تسجيل الحضور والانصراف</h2>
+
+      <div class="form-grid">
+
+        <div>
+          <label>الموظف</label>
+          <select id="attendanceEmployee"></select>
+        </div>
+
+        <div>
+          <label>التاريخ</label>
+          <input type="date" id="attendanceDate">
+        </div>
+
+        <div>
+          <label>الحالة</label>
+          <select id="attendanceStatus">
+            <option value="present">حاضر</option>
+            <option value="absent">غائب</option>
+          </select>
+        </div>
+
+      </div>
+
+      <br>
+
+      <button class="success" onclick="recordAttendance()">
+        تسجيل الحضور
+      </button>
+
+    </div>
+
+    <div class="box">
+
+      <h2>سجل الحضور</h2>
+
+      <div class="table-wrap">
+
+        <table>
+          <thead>
+            <tr>
+              <th>التاريخ</th>
+              <th>الموظف</th>
+              <th>الحالة</th>
+              <th>الوقت</th>
+              <th>الإجراء</th>
+            </tr>
+          </thead>
+
+          <tbody id="attendanceTable"></tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- الرواتب -->
+  <section id="salaries" class="section">
+
+    <div class="box">
+
+      <h2>حساب الرواتب</h2>
+
+      <div class="form-grid">
+
+        <div>
+          <label>الموظف</label>
+          <select id="salaryEmployee" onchange="calculateSalary()"></select>
+        </div>
+
+        <div>
+          <label>الراتب الأساسي</label>
+          <input id="salaryBasic" type="number" oninput="calculateSalary()">
+        </div>
+
+        <div>
+          <label>البدلات</label>
+          <input id="salaryAllowances" type="number" value="0" oninput="calculateSalary()">
+        </div>
+
+        <div>
+          <label>الخصومات</label>
+          <input id="salaryDeductions" type="number" value="0" oninput="calculateSalary()">
+        </div>
+
+      </div>
+
+      <div class="salary-result">
+        <strong>صافي الراتب: </strong>
+        <span id="netSalary">0</span>
+        جنيه
+      </div>
+
+      <br>
+
+      <button class="primary" onclick="saveSalary()">
+        حفظ الراتب
+      </button>
+
+    </div>
+
+    <div class="box">
+
+      <h2>سجل الرواتب</h2>
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>الموظف</th>
+              <th>الأساسي</th>
+              <th>البدلات</th>
+              <th>الخصومات</th>
+              <th>الصافي</th>
+              <th>التاريخ</th>
+            </tr>
+          </thead>
+
+          <tbody id="salaryTable"></tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </section>
+
+</div>
+
+<footer>
+  نظام إدارة الموظفين - نسخة تجريبية
+</footer>
+
+<!-- نافذة الموظف -->
+
+<div class="modal" id="employeeModal">
+
+  <div class="modal-content">
+
+    <div class="modal-header">
+
+      <h2 id="employeeModalTitle">إضافة موظف</h2>
+
+      <button class="close" onclick="closeEmployeeModal()">×</button>
+
+    </div>
+
+    <input type="hidden" id="employeeId">
+
+    <div class="form-grid">
+
+      <div>
+        <label>رقم الموظف</label>
+        <input id="employeeNumber" placeholder="مثال: EMP001">
+      </div>
+
+      <div>
+        <label>اسم الموظف</label>
+        <input id="employeeName" placeholder="اسم الموظف">
+      </div>
+
+      <div>
+        <label>القسم</label>
+        <input id="employeeDepartment" placeholder="مثال: الإدارة">
+      </div>
+
+      <div>
+        <label>الوظيفة</label>
+        <input id="employeeJob" placeholder="مثال: موظف">
+      </div>
+
+      <div>
+        <label>الراتب الأساسي</label>
+        <input id="employeeSalary" type="number" placeholder="0">
+      </div>
+
+    </div>
+
+    <br>
+
+    <div class="actions">
+
+      <button class="primary" onclick="saveEmployee()">
+        حفظ
+      </button>
+
+      <button class="secondary" onclick="closeEmployeeModal()">
+        إلغاء
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+let employees = JSON.parse(localStorage.getItem("employees")) || [];
+let attendance = JSON.parse(localStorage.getItem("attendance")) || [];
+let salaries = JSON.parse(localStorage.getItem("salaries")) || [];
+
+function saveData(){
+
+  localStorage.setItem("employees",JSON.stringify(employees));
+  localStorage.setItem("attendance",JSON.stringify(attendance));
+  localStorage.setItem("salaries",JSON.stringify(salaries));
+
+}
+
+function showSection(id,button){
+
+  document.querySelectorAll(".section").forEach(section=>{
+    section.classList.remove("active");
+  });
+
+  document.getElementById(id).classList.add("active");
+
+  document.querySelectorAll(".tabs button").forEach(btn=>{
+    btn.classList.remove("active");
+  });
+
+  button.classList.add("active");
+
+  refreshAll();
+
+}
+
+function openEmployeeModal(id=null){
+
+  document.getElementById("employeeModal").style.display="flex";
+
+  if(id){
+
+    const employee=employees.find(e=>e.id===id);
+
+    if(!employee) return;
+
+    document.getElementById("employeeModalTitle").textContent="تعديل موظف";
+
+    document.getElementById("employeeId").value=employee.id;
+    document.getElementById("employeeNumber").value=employee.number;
+    document.getElementById("employeeName").value=employee.name;
+    document.getElementById("employeeDepartment").value=employee.department;
+    document.getElementById("employeeJob").value=employee.job;
+    document.getElementById("employeeSalary").value=employee.salary;
+
+  }else{
+
+    document.getElementById("employeeModalTitle").textContent="إضافة موظف";
+
+    document.getElementById("employeeId").value="";
+    document.getElementById("employeeNumber").value="";
+    document.getElementById("employeeName").value="";
+    document.getElementById("employeeDepartment").value="";
+    document.getElementById("employeeJob").value="";
+    document.getElementById("employeeSalary").value="";
+
+  }
+
+}
+
+function closeEmployeeModal(){
+
+  document.getElementById("employeeModal").style.display="none";
+
+}
+
+function saveEmployee(){
+
+  const id=document.getElementById("employeeId").value;
+
+  const number=document.getElementById("employeeNumber").value.trim();
+  const name=document.getElementById("employeeName").value.trim();
+  const department=document.getElementById("employeeDepartment").value.trim();
+  const job=document.getElementById("employeeJob").value.trim();
+  const salary=Number(document.getElementById("employeeSalary").value)||0;
+
+  if(!number || !name){
+
+    alert("من فضلك أدخل رقم الموظف والاسم");
+    return;
+
+  }
+
+  if(id){
+
+    const employee=employees.find(e=>e.id===id);
+
+    if(employee){
+
+      employee.number=number;
+      employee.name=name;
+      employee.department=department;
+      employee.job=job;
+      employee.salary=salary;
+
+    }
+
+  }else{
+
+    employees.push({
+
+      id:Date.now().toString(),
+      number,
+      name,
+      department,
+      job,
+      salary
+
+    });
+
+  }
+
+  saveData();
+  closeEmployeeModal();
+  refreshAll();
+
+}
+
+function deleteEmployee(id){
+
+  const employee=employees.find(e=>e.id===id);
+
+  if(!employee) return;
+
+  if(!confirm("هل تريد حذف الموظف "+employee.name+"؟")) return;
+
+  employees=employees.filter(e=>e.id!==id);
+
+  saveData();
+  refreshAll();
+
+}
+
+function renderEmployees(){
+
+  const tbody=document.getElementById("employeesTable");
+
+  const search=(document.getElementById("employeeSearch").value||"").toLowerCase();
+
+  const list=employees.filter(e=>
+    e.name.toLowerCase().includes(search) ||
+    e.number.toLowerCase().includes(search)
+  );
+
+  if(!list.length){
+
+    tbody.innerHTML=`
+      <tr>
+        <td colspan="6" class="empty">
+          لا يوجد موظفون
+        </td>
+      </tr>
+    `;
+
+    return;
+
+  }
+
+  tbody.innerHTML=list.map(e=>`
+
+    <tr>
+
+      <td>${escapeHtml(e.number)}</td>
+
+      <td>${escapeHtml(e.name)}</td>
+
+      <td>${escapeHtml(e.department||"-")}</td>
+
+      <td>${escapeHtml(e.job||"-")}</td>
+
+      <td>${formatMoney(e.salary)}</td>
+
+      <td>
+
+        <div class="actions">
+
+          <button class="warning" onclick="openEmployeeModal('${e.id}')">
+            تعديل
+          </button>
+
+          <button class="danger" onclick="deleteEmployee('${e.id}')">
+            حذف
+          </button>
+
+        </div>
+
+      </td>
+
+    </tr>
+
+  `).join("");
+
+}
+
+function populateEmployeeSelects(){
+
+  const selects=[
+    document.getElementById("attendanceEmployee"),
+    document.getElementById("salaryEmployee")
+  ];
+
+  selects.forEach(select=>{
+
+    const old=select.value;
+
+    select.innerHTML="";
+
+    if(!employees.length){
+
+      select.innerHTML='<option value="">لا يوجد موظفون</option>';
+
+      return;
+
+    }
+
+    employees.forEach(e=>{
+
+      const option=document.createElement("option");
+
+      option.value=e.id;
+      option.textContent=e.number+" - "+e.name;
+
+      select.appendChild(option);
+
+    });
+
+    if(old && employees.some(e=>e.id===old)){
+      select.value=old;
+    }
+
+  });
+
+}
+
+function recordAttendance(){
+
+  const employeeId=document.getElementById("attendanceEmployee").value;
+  const date=document.getElementById("attendanceDate").value;
+  const status=document.getElementById("attendanceStatus").value;
+
+  if(!employeeId){
+
+    alert("أضف موظفًا أولًا");
+    return;
+
+  }
+
+  if(!date){
+
+    alert("اختر التاريخ");
+    return;
+
+  }
+
+  const employee=employees.find(e=>e.id===employeeId);
+
+  attendance.push({
+
+    id:Date.now().toString(),
+    employeeId,
+    employeeName:employee.name,
+    date,
+    status,
+    time:new Date().toLocaleTimeString("ar-EG",{
+      hour:"2-digit",
+      minute:"2-digit"
+    })
+
+  });
+
+  saveData();
+  renderAttendance();
+  updateDashboard();
+
+  alert("تم تسجيل الحضور");
+
+}
+
+function deleteAttendance(id){
+
+  attendance=attendance.filter(a=>a.id!==id);
+
+  saveData();
+  refreshAll();
+
+}
+
+function renderAttendance(){
+
+  const tbody=document.getElementById("attendanceTable");
+
+  if(!attendance.length){
+
+    tbody.innerHTML=`
+      <tr>
+        <td colspan="5" class="empty">
+          لا توجد سجلات
+        </td>
+      </tr>
+    `;
+
+    return;
+
+  }
+
+  const sorted=[...attendance].reverse();
+
+  tbody.innerHTML=sorted.map(a=>`
+
+    <tr>
+
+      <td>${a.date}</td>
+
+      <td>${escapeHtml(a.employeeName)}</td>
+
+      <td>
+
+        <span class="badge ${a.status==="present"?"present":"absent"}">
+
+          ${a.status==="present"?"حاضر":"غائب"}
+
+        </span>
+
+      </td>
+
+      <td>${a.time}</td>
+
+      <td>
+
+        <button class="danger" onclick="deleteAttendance('${a.id}')">
+          حذف
+        </button>
+
+      </td>
+
+    </tr>
+
+  `).join("");
+
+}
+
+function calculateSalary(){
+
+  const employeeId=document.getElementById("salaryEmployee").value;
+
+  const employee=employees.find(e=>e.id===employeeId);
+
+  if(employee){
+
+    document.getElementById("salaryBasic").value=employee.salary||0;
+
+  }
+
+  const basic=Number(document.getElementById("salaryBasic").value)||0;
+  const allowances=Number(document.getElementById("salaryAllowances").value)||0;
+  const deductions=Number(document.getElementById("salaryDeductions").value)||0;
+
+  const net=basic+allowances-deductions;
+
+  document.getElementById("netSalary").textContent=formatMoney(net);
+
+}
+
+function saveSalary(){
+
+  const employeeId=document.getElementById("salaryEmployee").value;
+
+  const employee=employees.find(e=>e.id===employeeId);
+
+  if(!employee){
+
+    alert("اختر موظفًا");
+    return;
+
+  }
+
+  const basic=Number(document.getElementById("salaryBasic").value)||0;
+  const allowances=Number(document.getElementById("salaryAllowances").value)||0;
+  const deductions=Number(document.getElementById("salaryDeductions").value)||0;
+
+  salaries.push({
+
+    id:Date.now().toString(),
+    employeeId,
+    employeeName:employee.name,
+    basic,
+    allowances,
+    deductions,
+    net:basic+allowances-deductions,
+    date:new Date().toLocaleDateString("ar-EG")
+
+  });
+
+  saveData();
+  renderSalaries();
+  updateDashboard();
+
+  alert("تم حفظ الراتب");
+
+}
+
+function renderSalaries(){
+
+  const tbody=document.getElementById("salaryTable");
+
+  if(!salaries.length){
+
+    tbody.innerHTML=`
+      <tr>
+        <td colspan="6" class="empty">
+          لا توجد رواتب محفوظة
+        </td>
+      </tr>
+    `;
+
+    return;
+
+  }
+
+  tbody.innerHTML=[...salaries].reverse().map(s=>`
+
+    <tr>
+
+      <td>${escapeHtml(s.employeeName)}</td>
+
+      <td>${formatMoney(s.basic)}</td>
+
+      <td>${formatMoney(s.allowances)}</td>
+
+      <td>${formatMoney(s.deductions)}</td>
+
+      <td><strong>${formatMoney(s.net)}</strong></td>
+
+      <td>${s.date}</td>
+
+    </tr>
+
+  `).join("");
+
+}
+
+function updateDashboard(){
+
+  document.getElementById("totalEmployees").textContent=employees.length;
+
+  const today=new Date().toISOString().split("T")[0];
+
+  const todayRecords=attendance.filter(a=>a.date===today);
+
+  const present=todayRecords.filter(a=>a.status==="present").length;
+
+  const absent=todayRecords.filter(a=>a.status==="absent").length;
+
+  document.getElementById("todayPresent").textContent=present;
+  document.getElementById("todayAbsent").textContent=absent;
+
+  const total=employees.reduce((sum,e)=>sum+(Number(e.salary)||0),0);
+
+  document.getElementById("totalSalaries").textContent=formatMoney(total);
+
+  const recent=document.getElementById("recentAttendance");
+
+  const records=[...attendance].reverse().slice(0,5);
+
+  if(!records.length){
+
+    recent.innerHTML='<div class="empty">لا توجد سجلات حضور حتى الآن</div>';
+    return;
+
+  }
+
+  recent.innerHTML=records.map(a=>`
+
+    <div style="padding:10px;border-bottom:1px solid #eee">
+
+      <strong>${escapeHtml(a.employeeName)}</strong>
+
+      -
+      ${a.status==="present"?"حاضر":"غائب"}
+
+      -
+      ${a.date}
+
+    </div>
+
+  `).join("");
+
+}
+
+function formatMoney(value){
+
+  return Number(value||0).toLocaleString("ar-EG");
+
+}
+
+function escapeHtml(text){
+
+  return String(text??"")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+
+}
+
+function refreshAll(){
+
+  renderEmployees();
+  populateEmployeeSelects();
+  renderAttendance();
+  renderSalaries();
+  updateDashboard();
+
+}
+
+document.getElementById("attendanceDate").value=
+  new Date().toISOString().split("T")[0];
+
+document.getElementById("salaryEmployee").addEventListener("change",calculateSalary);
+
+refreshAll();
+
+</script>
+
+</body>
+</html>
