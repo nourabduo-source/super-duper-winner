@@ -1073,4 +1073,648 @@ function openAttendanceEdit(row){
 document.getElementById("editAttendanceId").value=row.id;
 document.getElementById("editAttendanceEmployee").value=row.employee_id;
 document.getElementById("editAttendanceDate").value=row.attendance_date;
-document.getElementById("editAttendanceType").value=row.attendance_type||"
+document.getElementById("editAttendanceType").value=row.attendance_type||"full_day";
+document.getElementById("editDeductionEnabled").value=
+row.deduction_enabled?"true":"false";
+document.getElementById("editCheckIn").value=row.check_in||"";
+document.getElementById("editCheckOut").value=row.check_out||"";
+
+updateEditAttendancePreview();
+
+document.getElementById("attendanceModal").classList.add("show");
+}
+
+function closeAttendanceModal(){
+document.getElementById("attendanceModal").classList.remove("show");
+}
+
+function updateEditAttendancePreview(){
+
+const employeeId=document.getElementById("editAttendanceEmployee").value;
+const type=document.getElementById("editAttendanceType").value;
+const enabled=document.getElementById("editDeductionEnabled").value==="true";
+
+const employee=employeesCache.find(x=>String(x.id)===String(employeeId));
+const box=document.getElementById("editDeductionBox");
+const preview=document.getElementById("editAttendancePreview");
+
+box.style.display=type==="absent"?"none":"block";
+
+if(!employee){
+preview.textContent="اختر الموظف.";
+return;
+}
+
+const deduction=calculateDeduction(employee,type,type==="absent"?true:enabled);
+
+preview.innerHTML="قيمة الخصم: <strong>"+money(deduction)+" جنيه</strong>";
+}
+
+async function saveEditedAttendance(){
+
+const id=Number(document.getElementById("editAttendanceId").value);
+const employeeId=Number(document.getElementById("editAttendanceEmployee").value);
+const date=document.getElementById("editAttendanceDate").value;
+const type=document.getElementById("editAttendanceType").value;
+const enabled=type==="absent"?true:
+document.getElementById("editDeductionEnabled").value==="true";
+
+const employee=employeesCache.find(x=>Number(x.id)===employeeId);
+
+if(!employee){
+document.getElementById("editAttendanceStatus").textContent="الموظف غير موجود.";
+return;
+}
+
+const deduction=calculateDeduction(employee,type,enabled);
+
+const response=await supabaseClient
+.from("attendance")
+.update({
+employee_id:employeeId,
+attendance_date:date,
+status:type==="absent"?"absent":"present",
+attendance_type:type,
+deduction_enabled:enabled,
+deduction_amount:deduction,
+check_in:document.getElementById("editCheckIn").value||null,
+check_out:document.getElementById("editCheckOut").value||null
+})
+.eq("id",id);
+
+if(response.error){
+document.getElementById("editAttendanceStatus").textContent=
+"خطأ: "+response.error.message;
+return;
+}
+
+document.getElementById("editAttendanceStatus").textContent="تم التعديل بنجاح.";
+
+await loadAttendance();
+
+setTimeout(closeAttendanceModal,500);
+}
+
+async function deleteAttendance(id){
+
+if(!confirm("هل تريد حذف سجل الحضور هذا؟"))return;
+
+const response=await supabaseClient
+.from("attendance")
+.delete()
+.eq("id",Number(id));
+
+if(response.error){
+alert("خطأ في الحذف: "+response.error.message);
+return;
+}
+
+await loadAttendance();
+alert("تم حذف سجل الحضور.");
+}
+
+/* =========================
+   الرواتب
+========================= */
+
+function calculateSalaryData(employee,rows,month){
+
+const basic=Number(employee.basic_salary||0);
+
+let attendanceDays=0;
+let halfDays=0;
+let quarterDays=0;
+let absentDays=0;
+let attendanceAmount=0;
+
+rows.forEach(row=>{
+
+const type=row.attendance_type||"full_day";
+
+if(type==="full_day")attendanceDays++;
+if(type==="half_day")halfDays++;
+if(type==="quarter_day")quarterDays++;
+if(type==="absent")absentDays++;
+
+attendanceAmount+=Number(row.deduction_amount||0);
+
+});
+
+return {
+month,
+basicSalary:basic,
+attendanceDays,
+halfDays,
+quarterDays,
+absentDays,
+attendanceAmount
+};
+}
+
+async function getSavedSalary(employeeId,month){
+
+const r=await supabaseClient
+.from("salaries")
+.select("*")
+.eq("employee_id",Number(employeeId))
+.eq("month",month)
+.order("id",{ascending:false})
+.limit(1);
+
+if(r.error)return {data:null,error:r.error};
+
+return {
+data:r.data&&r.data.length?r.data[0]:null,
+error:null
+};
+}
+
+async function loadSalaries(){
+
+const body=document.getElementById("salariesBody");
+let month=document.getElementById("salaryMonth").value;
+
+if(!month){
+month=getCurrentMonth();
+document.getElementById("salaryMonth").value=month;
+}
+
+body.innerHTML="<tr><td colspan='15'>جاري حساب الرواتب...</td></tr>";
+
+const er=await supabaseClient
+.from("employees")
+.select("*")
+.order("id",{ascending:true});
+
+if(er.error){
+body.innerHTML=
+`<tr><td colspan="15" class="error">${esc(er.error.message)}</td></tr>`;
+return;
+}
+
+const ar=await supabaseClient
+.from("attendance")
+.select("*")
+.gte("attendance_date",month+"-01")
+.lt("attendance_date",getNextMonth(month));
+
+if(ar.error){
+body.innerHTML=
+`<tr><td colspan="15" class="error">${esc(ar.error.message)}</td></tr>`;
+return;
+}
+
+const employees=er.data||[];
+const attendance=ar.data||[];
+
+if(!employees.length){
+body.innerHTML=
+`<tr><td colspan="15" class="empty">لا يوجد موظفون.</td></tr>`;
+return;
+}
+
+const rows=[];
+
+for(const employee of employees){
+
+const employeeAttendance=attendance.filter(
+x=>Number(x.employee_id)===Number(employee.id)
+);
+
+const calculated=calculateSalaryData(
+employee,
+employeeAttendance,
+month
+);
+
+const saved=await getSavedSalary(employee.id,month);
+
+const s=saved.data||{
+id:"",
+allowances:0,
+advances:0,
+other_deductions:0,
+leave_deductions:0,
+notes:""
+};
+
+const allowances=Number(s.allowances||0);
+const advances=Number(s.advances||0);
+const other=Number(s.other_deductions||0);
+const leave=Number(s.leave_deductions||0);
+
+const total=
+calculated.attendanceAmount+
+leave+
+advances+
+other;
+
+const net=
+calculated.basicSalary+
+allowances-
+total;
+
+rows.push({
+employee,
+calculated,
+saved:s,
+allowances,
+advances,
+other,
+leave,
+total,
+net
+});
+}
+
+body.innerHTML=rows.map(x=>`
+
+<tr>
+<td>${esc(month)}</td>
+<td><strong>${esc(x.employee.name)}</strong></td>
+<td>${money(x.calculated.basicSalary)} جنيه</td>
+<td>${x.calculated.attendanceDays}</td>
+<td>${x.calculated.halfDays}</td>
+<td>${x.calculated.quarterDays}</td>
+<td>${x.calculated.absentDays}</td>
+<td>${money(x.calculated.attendanceAmount)} جنيه</td>
+<td>${money(x.leave)} جنيه</td>
+<td>${money(x.allowances)} جنيه</td>
+<td>${money(x.advances)} جنيه</td>
+<td>${money(x.other)} جنيه</td>
+<td>${money(x.total)} جنيه</td>
+<td>
+<strong style="color:#15803d">
+${money(x.net)} جنيه
+</strong>
+</td>
+<td>
+<button class="primary"
+onclick='openSalaryEdit(${JSON.stringify({
+employee:x.employee,
+calculated:x.calculated,
+saved:x.saved,
+allowances:x.allowances,
+advances:x.advances,
+other:x.other,
+leave:x.leave,
+total:x.total,
+net:x.net
+})})'>
+تعديل
+</button>
+
+<button class="warning"
+onclick='printSalary(${JSON.stringify({
+employee:x.employee,
+calculated:x.calculated,
+saved:x.saved,
+allowances:x.allowances,
+advances:x.advances,
+other:x.other,
+leave:x.leave,
+total:x.total,
+net:x.net
+})})'>
+طباعة
+</button>
+
+${x.saved.id?`
+<button class="danger" onclick="deleteSalary(${x.saved.id})">
+حذف
+</button>`:""}
+
+</td>
+</tr>
+
+`).join("");
+}
+
+/* =========================
+   تعديل الراتب
+========================= */
+
+function openSalaryEdit(data){
+
+salaryModalData=data;
+
+document.getElementById("salaryEditId").value=data.saved.id||"";
+document.getElementById("salaryEmployeeName").value=data.employee.name||"";
+document.getElementById("salaryEditMonth").value=data.calculated.month;
+document.getElementById("salaryBasic").value=data.calculated.basicSalary;
+document.getElementById("salaryAttendanceDays").value=data.calculated.attendanceDays;
+document.getElementById("salaryHalfDays").value=data.calculated.halfDays;
+document.getElementById("salaryQuarterDays").value=data.calculated.quarterDays;
+document.getElementById("salaryAbsentDays").value=data.calculated.absentDays;
+document.getElementById("salaryAttendanceAmount").value=data.calculated.attendanceAmount;
+
+document.getElementById("salaryLeaveDeductions").value=data.leave;
+document.getElementById("salaryAllowances").value=data.allowances;
+document.getElementById("salaryAdvances").value=data.advances;
+document.getElementById("salaryOtherDeductions").value=data.other;
+document.getElementById("salaryNotes").value=data.saved.notes||"";
+
+document.getElementById("salaryStatus").textContent="";
+
+calculateSalaryModalTotal();
+
+document.getElementById("salaryModal").classList.add("show");
+}
+
+function closeSalaryModal(){
+document.getElementById("salaryModal").classList.remove("show");
+}
+
+function calculateSalaryModalTotal(){
+
+const basic=Number(document.getElementById("salaryBasic").value||0);
+const attendance=Number(document.getElementById("salaryAttendanceAmount").value||0);
+const leave=Number(document.getElementById("salaryLeaveDeductions").value||0);
+const allowances=Number(document.getElementById("salaryAllowances").value||0);
+const advances=Number(document.getElementById("salaryAdvances").value||0);
+const other=Number(document.getElementById("salaryOtherDeductions").value||0);
+
+const total=attendance+leave+advances+other;
+const net=basic+allowances-total;
+
+document.getElementById("salaryTotalDeductions").textContent=
+money(total)+" جنيه";
+
+document.getElementById("salaryNet").textContent=
+money(net)+" جنيه";
+}
+
+async function saveSalary(){
+
+const status=document.getElementById("salaryStatus");
+
+if(!salaryModalData){
+status.textContent="لا توجد بيانات راتب.";
+return;
+}
+
+const employeeId=Number(salaryModalData.employee.id);
+const month=document.getElementById("salaryEditMonth").value;
+
+const basic=Number(document.getElementById("salaryBasic").value||0);
+const attendanceDays=Number(document.getElementById("salaryAttendanceDays").value||0);
+const halfDays=Number(document.getElementById("salaryHalfDays").value||0);
+const quarterDays=Number(document.getElementById("salaryQuarterDays").value||0);
+const absentDays=Number(document.getElementById("salaryAbsentDays").value||0);
+const attendanceAmount=Number(document.getElementById("salaryAttendanceAmount").value||0);
+
+const leave=Number(document.getElementById("salaryLeaveDeductions").value||0);
+const allowances=Number(document.getElementById("salaryAllowances").value||0);
+const advances=Number(document.getElementById("salaryAdvances").value||0);
+const other=Number(document.getElementById("salaryOtherDeductions").value||0);
+
+const total=attendanceAmount+leave+advances+other;
+const net=basic+allowances-total;
+
+const data={
+employee_id:employeeId,
+month,
+basic_salary:basic,
+attendance_days:attendanceDays,
+half_days:halfDays,
+quarter_days:quarterDays,
+absent_days:absentDays,
+attendance_amount:attendanceAmount,
+leave_deductions:leave,
+allowances,
+advances,
+other_deductions:other,
+net_salary:net,
+notes:document.getElementById("salaryNotes").value.trim()
+};
+
+status.textContent="جاري حفظ الراتب...";
+
+const existing=await getSavedSalary(employeeId,month);
+
+if(existing.error){
+status.textContent="خطأ: "+existing.error.message;
+return;
+}
+
+let response;
+
+if(existing.data){
+
+response=await supabaseClient
+.from("salaries")
+.update(data)
+.eq("id",existing.data.id);
+
+}else{
+
+response=await supabaseClient
+.from("salaries")
+.insert([data]);
+
+}
+
+if(response.error){
+status.textContent="خطأ في حفظ الراتب: "+response.error.message;
+return;
+}
+
+status.textContent="تم حفظ بيان الراتب بنجاح.";
+
+await loadSalaries();
+
+setTimeout(closeSalaryModal,700);
+}
+
+/* =========================
+   حذف الراتب
+========================= */
+
+async function deleteSalary(id){
+
+if(!confirm("هل تريد حذف بيان الراتب هذا؟"))return;
+
+const response=await supabaseClient
+.from("salaries")
+.delete()
+.eq("id",Number(id));
+
+if(response.error){
+alert("خطأ في حذف الراتب: "+response.error.message);
+return;
+}
+
+await loadSalaries();
+
+alert("تم حذف بيان الراتب.");
+}
+
+/* =========================
+   الطباعة
+========================= */
+
+function printSalary(data){
+
+const total=data.total;
+const net=data.net;
+
+const html=`
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>بيان راتب</title>
+<style>
+body{
+font-family:Arial,Tahoma;
+padding:30px;
+color:#111827;
+}
+h1{text-align:center;color:#123b63}
+h2{text-align:center}
+.info{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px;
+margin:20px 0;
+}
+.box{
+border:1px solid #ddd;
+padding:12px;
+border-radius:8px;
+}
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:20px;
+}
+th,td{
+border:1px solid #ddd;
+padding:12px;
+}
+th{
+background:#eef4fa;
+}
+.net{
+font-size:20px;
+font-weight:bold;
+background:#ecfdf5;
+}
+</style>
+</head>
+<body>
+
+<h1>بيان راتب</h1>
+<h2>${esc(data.employee.name)}</h2>
+
+<div class="info">
+<div class="box"><strong>كود الموظف:</strong> ${esc(data.employee.employee_number)}</div>
+<div class="box"><strong>الشهر:</strong> ${esc(data.calculated.month)}</div>
+<div class="box"><strong>الوظيفة:</strong> ${esc(data.employee.job)}</div>
+<div class="box"><strong>الراتب الأساسي:</strong> ${money(data.calculated.basicSalary)} جنيه</div>
+</div>
+
+<table>
+<tr><th>البيان</th><th>القيمة</th></tr>
+<tr><td>أيام الحضور</td><td>${data.calculated.attendanceDays}</td></tr>
+<tr><td>أنصاف الأيام</td><td>${data.calculated.halfDays}</td></tr>
+<tr><td>أرباع الأيام</td><td>${data.calculated.quarterDays}</td></tr>
+<tr><td>أيام الغياب</td><td>${data.calculated.absentDays}</td></tr>
+<tr><td>خصم الحضور والغياب</td><td>${money(data.calculated.attendanceAmount)} جنيه</td></tr>
+<tr><td>خصم الإجازات</td><td>${money(data.leave)} جنيه</td></tr>
+<tr><td>البدلات</td><td>${money(data.allowances)} جنيه</td></tr>
+<tr><td>السلف</td><td>${money(data.advances)} جنيه</td></tr>
+<tr><td>خصومات أخرى</td><td>${money(data.other)} جنيه</td></tr>
+<tr><td><strong>إجمالي الخصومات</strong></td><td><strong>${money(total)} جنيه</strong></td></tr>
+<tr class="net"><td>صافي الراتب</td><td>${money(net)} جنيه</td></tr>
+</table>
+
+${data.saved.notes?`
+<p><strong>ملاحظات:</strong> ${esc(data.saved.notes)}</p>
+`:""}
+
+<br><br>
+<p style="text-align:center">توقيع الموظف: ____________________</p>
+<p style="text-align:center">توقيع المسؤول: ____________________</p>
+
+<script>
+window.onload=function(){
+window.print();
+}
+<\/script>
+
+</body>
+</html>
+`;
+
+const win=window.open("","_blank");
+
+if(!win){
+alert("المتصفح منع نافذة الطباعة. اسمح بالنوافذ المنبثقة.");
+return;
+}
+
+win.document.write(html);
+win.document.close();
+}
+
+function printSalaryFromModal(){
+
+if(!salaryModalData)return;
+
+const data={
+employee:salaryModalData.employee,
+calculated:salaryModalData.calculated,
+saved:{
+...salaryModalData.saved,
+notes:document.getElementById("salaryNotes").value
+},
+allowances:Number(document.getElementById("salaryAllowances").value||0),
+advances:Number(document.getElementById("salaryAdvances").value||0),
+other:Number(document.getElementById("salaryOtherDeductions").value||0),
+leave:Number(document.getElementById("salaryLeaveDeductions").value||0),
+total:Number(
+document.getElementById("salaryAttendanceAmount").value||0
+)+
+Number(document.getElementById("salaryLeaveDeductions").value||0)+
+Number(document.getElementById("salaryAdvances").value||0)+
+Number(document.getElementById("salaryOtherDeductions").value||0),
+net:Number(document.getElementById("salaryNet").textContent.replace(/[^\d.-]/g,""))||0
+};
+
+printSalary(data);
+}
+
+/* =========================
+   التشغيل
+========================= */
+
+document.addEventListener("DOMContentLoaded",function(){
+
+document.getElementById("attendanceDate").value=getToday();
+document.getElementById("salaryMonth").value=getCurrentMonth();
+
+document.getElementById("salaryMonth")
+.addEventListener("change",loadSalaries);
+
+document.getElementById("attendanceEmployee")
+.addEventListener("change",updateDeductionPreview);
+
+[
+"salaryLeaveDeductions",
+"salaryAllowances",
+"salaryAdvances",
+"salaryOtherDeductions"
+].forEach(id=>{
+document.getElementById(id)
+.addEventListener("input",calculateSalaryModalTotal);
+});
+
+loadEmployees();
+
+});
+</script>
+
+</body>
+</html>
