@@ -872,6 +872,28 @@ status.textContent="اكتب اسم الموظف وكود الموظف.";
 return;
 }
 
+let duplicateQuery = supabaseClient
+  .from("employees")
+  .select("id")
+  .eq("employee_number", number);
+
+if(id){
+  duplicateQuery = duplicateQuery.neq("id", id);
+}
+
+const { data: duplicateEmployee, error: duplicateError } = await duplicateQuery;
+
+if(duplicateError){
+  status.textContent = "تعذر التحقق من كود الموظف.";
+  console.error(duplicateError);
+  return;
+}
+
+if(duplicateEmployee && duplicateEmployee.length > 0){
+  status.textContent = "كود الموظف مستخدم بالفعل.";
+  return;
+}
+
 const data={
 name,
 employee_number:number,
