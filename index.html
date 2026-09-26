@@ -1971,5 +1971,331 @@ loadDashboard();
 });
 </script>
 
+<!-- تقرير الحضور الشهري -->
+<div id="monthlyReportBox" style="margin:20px;padding:20px;background:#fff;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.08);">
+
+  <h2 style="margin-top:0;">تقرير الحضور الشهري</h2>
+
+  <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin-bottom:15px;">
+    
+    <div>
+      <label>الشهر</label><br>
+      <input
+        type="month"
+        id="monthlyReportMonth"
+        style="padding:10px;border:1px solid #ddd;border-radius:8px;"
+      >
+    </div>
+
+    <button
+      class="primary"
+      onclick="loadMonthlyAttendanceReport()"
+      style="padding:10px 18px;"
+    >
+      عرض التقرير
+    </button>
+
+    <button
+      class="primary"
+      onclick="printMonthlyAttendanceReport()"
+      style="padding:10px 18px;"
+    >
+      طباعة التقرير
+    </button>
+
+  </div>
+
+  <div id="monthlyReportSummary"
+       style="margin-bottom:15px;font-weight:bold;">
+  </div>
+
+  <div style="overflow-x:auto;">
+
+    <table style="width:100%;border-collapse:collapse;text-align:center;">
+
+      <thead>
+        <tr>
+          <th style="padding:10px;border:1px solid #ddd;">الموظف</th>
+          <th style="padding:10px;border:1px solid #ddd;">رقم الموظف</th>
+          <th style="padding:10px;border:1px solid #ddd;">حضور</th>
+          <th style="padding:10px;border:1px solid #ddd;">غياب</th>
+          <th style="padding:10px;border:1px solid #ddd;">نصف يوم</th>
+          <th style="padding:10px;border:1px solid #ddd;">ربع يوم</th>
+          <th style="padding:10px;border:1px solid #ddd;">الخصومات</th>
+        </tr>
+      </thead>
+
+      <tbody id="monthlyReportBody">
+        <tr>
+          <td colspan="7" style="padding:20px;">
+            اختر الشهر واضغط عرض التقرير.
+          </td>
+        </tr>
+      </tbody>
+
+    </table>
+
+  </div>
+
+</div>
+
+<script>
+
+async function loadMonthlyAttendanceReport(){
+
+  const month =
+    document.getElementById("monthlyReportMonth").value ||
+    getCurrentMonth();
+
+  document.getElementById("monthlyReportMonth").value = month;
+
+  const startDate = month + "-01";
+
+  const nextMonth = getNextMonth(month);
+
+  const endDate = nextMonth + "-01";
+
+  const body = document.getElementById("monthlyReportBody");
+  const summary = document.getElementById("monthlyReportSummary");
+
+  body.innerHTML = `
+    <tr>
+      <td colspan="7" style="padding:20px;">
+        جاري تحميل التقرير...
+      </td>
+    </tr>
+  `;
+
+  const { data: employees, error: employeesError } =
+    await supabaseClient
+      .from("employees")
+      .select("*")
+      .order("employee_number");
+
+  if(employeesError){
+
+    body.innerHTML = `
+      <tr>
+        <td colspan="7" style="padding:20px;color:red;">
+          حدث خطأ في تحميل الموظفين.
+        </td>
+      </tr>
+    `;
+
+    console.error(employeesError);
+    return;
+  }
+
+  const { data: attendance, error: attendanceError } =
+    await supabaseClient
+      .from("attendance")
+      .select("*")
+      .gte("attendance_date", startDate)
+      .lt("attendance_date", endDate);
+
+  if(attendanceError){
+
+    body.innerHTML = `
+      <tr>
+        <td colspan="7" style="padding:20px;color:red;">
+          حدث خطأ في تحميل الحضور.
+        </td>
+      </tr>
+    `;
+
+    console.error(attendanceError);
+    return;
+  }
+
+  let totalPresent = 0;
+  let totalAbsent = 0;
+  let totalHalf = 0;
+  let totalQuarter = 0;
+  let totalDeductions = 0;
+
+  body.innerHTML = employees.map(employee => {
+
+    const rows = attendance.filter(
+      row => Number(row.employee_id) === Number(employee.id)
+    );
+
+    let present = 0;
+    let absent = 0;
+    let half = 0;
+    let quarter = 0;
+    let deductions = 0;
+
+    rows.forEach(row => {
+
+      const type = row.attendance_type || "full_day";
+
+      if(type === "full_day"){
+        present++;
+      }
+
+      if(type === "absent"){
+        absent++;
+      }
+
+      if(type === "half_day"){
+        half++;
+      }
+
+      if(type === "quarter_day"){
+        quarter++;
+      }
+
+      deductions += Number(row.deduction_amount || 0);
+
+    });
+
+    totalPresent += present;
+    totalAbsent += absent;
+    totalHalf += half;
+    totalQuarter += quarter;
+    totalDeductions += deductions;
+
+    return `
+      <tr>
+
+        <td style="padding:10px;border:1px solid #ddd;">
+          ${esc(employee.name || "-")}
+        </td>
+
+        <td style="padding:10px;border:1px solid #ddd;">
+          ${esc(employee.employee_number || "-")}
+        </td>
+
+        <td style="padding:10px;border:1px solid #ddd;">
+          ${present}
+        </td>
+
+        <td style="padding:10px;border:1px solid #ddd;">
+          ${absent}
+        </td>
+
+        <td style="padding:10px;border:1px solid #ddd;">
+          ${half}
+        </td>
+
+        <td style="padding:10px;border:1px solid #ddd;">
+          ${quarter}
+        </td>
+
+        <td style="padding:10px;border:1px solid #ddd;">
+          ${money(deductions)} جنيه
+        </td>
+
+      </tr>
+    `;
+
+  }).join("");
+
+  summary.innerHTML =
+    "الشهر: " + month +
+    " | الموظفون: " + employees.length +
+    " | الحضور: " + totalPresent +
+    " | الغياب: " + totalAbsent +
+    " | نصف يوم: " + totalHalf +
+    " | ربع يوم: " + totalQuarter +
+    " | إجمالي الخصومات: " + money(totalDeductions) + " جنيه";
+
+}
+
+
+function printMonthlyAttendanceReport(){
+
+  const report = document.getElementById("monthlyReportBox");
+
+  const month =
+    document.getElementById("monthlyReportMonth").value ||
+    getCurrentMonth();
+
+  const printWindow = window.open("", "_blank");
+
+  if(!printWindow){
+    alert("اسمح بفتح نافذة الطباعة من المتصفح.");
+    return;
+  }
+
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html lang="ar" dir="rtl">
+
+    <head>
+
+      <meta charset="UTF-8">
+
+      <title>تقرير الحضور الشهري</title>
+
+      <style>
+
+        body{
+          font-family:Arial,sans-serif;
+          direction:rtl;
+          padding:20px;
+        }
+
+        h1{
+          text-align:center;
+        }
+
+        table{
+          width:100%;
+          border-collapse:collapse;
+          margin-top:20px;
+        }
+
+        th,td{
+          border:1px solid #333;
+          padding:8px;
+          text-align:center;
+        }
+
+        button,input{
+          display:none;
+        }
+
+      </style>
+
+    </head>
+
+    <body>
+
+      <h1>تقرير الحضور الشهري</h1>
+
+      <h3 style="text-align:center;">
+        شهر ${month}
+      </h3>
+
+      ${report.innerHTML}
+
+    </body>
+
+    </html>
+  `);
+
+  printWindow.document.close();
+
+  setTimeout(function(){
+    printWindow.print();
+  },500);
+
+}
+
+
+document.addEventListener("DOMContentLoaded",function(){
+
+  const monthInput =
+    document.getElementById("monthlyReportMonth");
+
+  if(monthInput){
+    monthInput.value = getCurrentMonth();
+  }
+
+});
+
+</script>
+
 </body>
 </html>
