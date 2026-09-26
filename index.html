@@ -2075,15 +2075,15 @@ async function loadMonthlyAttendanceReport(){
   if(employeesError){
 
     body.innerHTML = `
-      <tr>
-        <td colspan="7" style="padding:20px;color:red;">
-          حدث خطأ في تحميل الموظفين.
-        </td>
-      </tr>
-    `;
+  <tr>
+    <td colspan="7" style="padding:20px;color:red;">
+      خطأ في تحميل الحضور: ${esc(attendanceError.message || "خطأ غير معروف")}
+    </td>
+  </tr>
+`;
 
-    console.error(employeesError);
-    return;
+console.error(attendanceError);
+return;
   }
 
   const { data: attendance, error: attendanceError } =
