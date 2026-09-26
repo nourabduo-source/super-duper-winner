@@ -72,6 +72,34 @@ th,td{font-size:13px}.tabs button{flex:1}.big-action{width:100%}
 
 <!-- الرئيسية -->
 <section id="home" class="section active">
+  <div class="summary-grid" id="dashboardStats">
+
+<div class="summary-box">
+إجمالي الموظفين
+<strong id="dashboardEmployees">0</strong>
+</div>
+
+<div class="summary-box net-box">
+الحاضرون اليوم
+<strong id="dashboardPresent">0</strong>
+</div>
+
+<div class="summary-box deduction-total">
+الغائبون اليوم
+<strong id="dashboardAbsent">0</strong>
+</div>
+
+<div class="summary-box">
+الإجازات / التصاريح
+<strong id="dashboardLeave">0</strong>
+</div>
+
+<div class="summary-box">
+إجمالي الرواتب الأساسية
+<strong id="dashboardPayroll">0.00 جنيه</strong>
+</div>
+
+  </div>
 <div class="card">
 <h2>الرئيسية</h2>
 <p>نظام إدارة الموظفين والحضور والانصراف والرواتب.</p>
@@ -557,6 +585,10 @@ if(target)target.classList.add("active");
 document.querySelectorAll(".tabs button").forEach(x=>x.classList.remove("active"));
 if(btn)btn.classList.add("active");
 
+if(id==="home"){
+loadDashboard();
+}
+
 if(id==="employees")loadEmployees();
 
 if(id==="attendance"){
@@ -566,6 +598,7 @@ loadAttendance();
 
 if(id==="salaries"){
 loadSalaries();
+}
 }
 }
 
@@ -1687,6 +1720,78 @@ printSalary(data);
 }
 
 /* =========================
+   لوحة التحكم
+========================= */
+
+async function loadDashboard(){
+
+const employeesBox=document.getElementById("dashboardEmployees");
+const presentBox=document.getElementById("dashboardPresent");
+const absentBox=document.getElementById("dashboardAbsent");
+const leaveBox=document.getElementById("dashboardLeave");
+const payrollBox=document.getElementById("dashboardPayroll");
+
+if(!employeesBox)return;
+
+const employeesResponse=await supabaseClient
+.from("employees")
+.select("id,basic_salary");
+
+if(employeesResponse.error){
+console.error(employeesResponse.error);
+return;
+}
+
+const employees=employeesResponse.data||[];
+
+employeesBox.textContent=employees.length;
+
+const payroll=employees.reduce(
+(sum,e)=>sum+Number(e.basic_salary||0),
+0
+);
+
+payrollBox.textContent=money(payroll)+" جنيه";
+
+const today=getToday();
+
+const attendanceResponse=await supabaseClient
+.from("attendance")
+.select("*")
+.eq("attendance_date",today);
+
+if(attendanceResponse.error){
+console.error(attendanceResponse.error);
+return;
+}
+
+const attendance=attendanceResponse.data||[];
+
+let present=0;
+let absent=0;
+let leave=0;
+
+attendance.forEach(row=>{
+
+const type=row.attendance_type||"full_day";
+
+if(type==="absent"){
+absent++;
+}else if(type==="half_day"||type==="quarter_day"){
+leave++;
+}else{
+present++;
+}
+
+});
+
+presentBox.textContent=present;
+absentBox.textContent=absent;
+leaveBox.textContent=leave;
+
+}
+  
+/* =========================
    التشغيل
 ========================= */
 
@@ -1712,6 +1817,9 @@ document.getElementById(id)
 });
 
 loadEmployees();
+loadDashboard();
+
+});
 
 });
 </script>
