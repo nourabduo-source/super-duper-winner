@@ -3,9 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>نظام إدارة الموظفين</title>
 
 <style>
+
 * {
   box-sizing: border-box;
 }
@@ -114,6 +116,11 @@ button:hover {
   color: white;
 }
 
+.warning {
+  background: #d97706;
+  color: white;
+}
+
 .big-action {
   font-size: 18px;
   padding: 14px 24px;
@@ -130,6 +137,7 @@ td {
   padding: 11px 8px;
   border-bottom: 1px solid #e5e7eb;
   text-align: right;
+  white-space: nowrap;
 }
 
 th {
@@ -153,13 +161,19 @@ label {
 }
 
 input,
-select {
+select,
+textarea {
   width: 100%;
   padding: 11px;
   border: 1px solid #cbd5e1;
   border-radius: 8px;
   font-size: 15px;
   background: white;
+}
+
+textarea {
+  min-height: 80px;
+  resize: vertical;
 }
 
 .modal {
@@ -179,7 +193,7 @@ select {
 
 .modal-box {
   background: white;
-  width: min(600px, 100%);
+  width: min(700px, 100%);
   border-radius: 12px;
   padding: 20px;
   max-height: 90vh;
@@ -229,7 +243,51 @@ select {
   color: #15803d;
 }
 
+.deduction-box {
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+.no-deduction-box {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-top: 15px;
+}
+
+.summary-box {
+  background: #eef4fa;
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.summary-box strong {
+  display: block;
+  font-size: 20px;
+  margin-top: 5px;
+}
+
+.net-box {
+  background: #ecfdf5;
+}
+
+.deduction-total {
+  background: #fff7ed;
+}
+
 @media (max-width: 600px) {
+
   header h1 {
     font-size: 20px;
   }
@@ -246,7 +304,12 @@ select {
   .tabs button {
     flex: 1;
   }
+
+  .big-action {
+    width: 100%;
+  }
 }
+
 </style>
 </head>
 
@@ -258,29 +321,43 @@ select {
 
 <div class="container">
 
-  <!-- التبويبات -->
+  <!-- =====================================================
+       التبويبات
+       ===================================================== -->
+
   <div class="tabs">
 
-    <button class="active" onclick="showTab('home', this)">
+    <button
+      class="active"
+      onclick="showTab('home', this)">
       الرئيسية
     </button>
 
-    <button onclick="showTab('employees', this)">
+    <button
+      onclick="showTab('employees', this)">
       الموظفون
     </button>
 
-    <button onclick="showTab('attendance', this)">
+    <button
+      onclick="showTab('attendance', this)">
       الحضور والانصراف
     </button>
 
-    <button onclick="showTab('salaries', this)">
+    <button
+      onclick="showTab('salaries', this)">
       الرواتب
     </button>
 
   </div>
 
-  <!-- الرئيسية -->
-  <section id="home" class="section active">
+
+  <!-- =====================================================
+       الرئيسية
+       ===================================================== -->
+
+  <section
+    id="home"
+    class="section active">
 
     <div class="card">
 
@@ -306,7 +383,9 @@ select {
 
       </div>
 
-      <div id="homeStatus" class="status">
+      <div
+        id="homeStatus"
+        class="status">
         جاهز.
       </div>
 
@@ -314,8 +393,14 @@ select {
 
   </section>
 
-  <!-- الموظفون -->
-  <section id="employees" class="section">
+
+  <!-- =====================================================
+       الموظفون
+       ===================================================== -->
+
+  <section
+    id="employees"
+    class="section">
 
     <div class="card">
 
@@ -337,25 +422,29 @@ select {
 
     </div>
 
+
     <div class="card table-wrap">
 
       <table>
 
         <thead>
+
           <tr>
             <th>اسم الموظف</th>
             <th>كود الموظف</th>
             <th>رقم الهاتف</th>
             <th>الوظيفة</th>
             <th>الراتب الشهري</th>
+            <th>الأجر اليومي</th>
             <th>الإجراءات</th>
           </tr>
+
         </thead>
 
         <tbody id="employeesBody">
 
           <tr>
-            <td colspan="6">
+            <td colspan="7">
               جاري التحميل...
             </td>
           </tr>
@@ -368,8 +457,14 @@ select {
 
   </section>
 
-  <!-- الحضور والانصراف -->
-  <section id="attendance" class="section">
+
+  <!-- =====================================================
+       الحضور والانصراف
+       ===================================================== -->
+
+  <section
+    id="attendance"
+    class="section">
 
     <div class="card">
 
@@ -395,6 +490,7 @@ select {
 
         </div>
 
+
         <div>
 
           <label>
@@ -407,9 +503,74 @@ select {
 
         </div>
 
+
+        <div>
+
+          <label>
+            نوع الحضور
+          </label>
+
+          <select
+            id="attendanceType"
+            onchange="updateAttendanceType()">
+
+            <option value="full_day">
+              يوم كامل
+            </option>
+
+            <option value="half_day">
+              نصف يوم
+            </option>
+
+            <option value="quarter_day">
+              ربع يوم
+            </option>
+
+            <option value="absent">
+              غياب
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div id="deductionChoiceBox">
+
+          <label>
+            الخصم
+          </label>
+
+          <select
+            id="deductionEnabled"
+            onchange="updateDeductionPreview()">
+
+            <option value="false">
+              بدون خصم
+            </option>
+
+            <option value="true">
+              بخصم
+            </option>
+
+          </select>
+
+        </div>
+
       </div>
 
+
+      <div
+        id="deductionPreview"
+        class="no-deduction-box">
+
+        اختر الموظف ونوع الحضور لمعرفة قيمة الخصم.
+
+      </div>
+
+
       <br>
+
 
       <div class="actions">
 
@@ -425,7 +586,20 @@ select {
           تسجيل خروج
         </button>
 
+        <button
+          class="primary"
+          onclick="saveAttendanceType()">
+          حفظ حالة الحضور
+        </button>
+
+        <button
+          class="secondary"
+          onclick="loadAttendance()">
+          تحديث
+        </button>
+
       </div>
+
 
       <div
         id="attendanceStatus"
@@ -435,6 +609,7 @@ select {
 
     </div>
 
+
     <div class="card table-wrap">
 
       <table>
@@ -442,20 +617,25 @@ select {
         <thead>
 
           <tr>
+
             <th>التاريخ</th>
             <th>الموظف</th>
             <th>الكود</th>
             <th>الحالة</th>
+            <th>نوع الحضور</th>
+            <th>الخصم</th>
             <th>دخول</th>
             <th>خروج</th>
+
           </tr>
 
         </thead>
 
+
         <tbody id="attendanceBody">
 
           <tr>
-            <td colspan="6">
+            <td colspan="8">
               جاري التحميل...
             </td>
           </tr>
@@ -468,21 +648,61 @@ select {
 
   </section>
 
-  <!-- الرواتب -->
-  <section id="salaries" class="section">
+
+  <!-- =====================================================
+       الرواتب
+       ===================================================== -->
+
+  <section
+    id="salaries"
+    class="section">
 
     <div class="card">
 
-      <h2>
-        الرواتب
-      </h2>
+      <div
+        class="actions"
+        style="justify-content:space-between;align-items:center">
 
-      <p>
-        يتم تجهيز حساب الراتب من أيام الحضور والأجر اليومي،
-        مع البدلات والخصومات.
-      </p>
+        <div>
+
+          <h2 style="margin:0">
+            الرواتب
+          </h2>
+
+          <p>
+            يتم حساب الخصومات من الحضور والانصراف والأجر اليومي.
+          </p>
+
+        </div>
+
+
+        <button
+          class="primary"
+          onclick="loadSalaries()">
+          تحديث الرواتب
+        </button>
+
+      </div>
+
+
+      <div class="grid">
+
+        <div>
+
+          <label>
+            شهر الراتب
+          </label>
+
+          <input
+            id="salaryMonth"
+            type="month">
+
+        </div>
+
+      </div>
 
     </div>
+
 
     <div class="card table-wrap">
 
@@ -491,20 +711,28 @@ select {
         <thead>
 
           <tr>
+
             <th>الشهر</th>
             <th>الموظف</th>
             <th>الأساسي</th>
+            <th>أيام الحضور</th>
+            <th>نصف يوم</th>
+            <th>ربع يوم</th>
+            <th>الغياب</th>
+            <th>خصم الحضور</th>
             <th>البدلات</th>
             <th>الخصومات</th>
             <th>الصافي</th>
+
           </tr>
 
         </thead>
 
+
         <tbody id="salariesBody">
 
           <tr>
-            <td colspan="6">
+            <td colspan="11">
               جاري التحميل...
             </td>
           </tr>
@@ -519,9 +747,14 @@ select {
 
 </div>
 
-<!-- نافذة الموظف -->
 
-<div id="employeeModal" class="modal">
+<!-- =====================================================
+     نافذة الموظف
+     ===================================================== -->
+
+<div
+  id="employeeModal"
+  class="modal">
 
   <div class="modal-box">
 
@@ -539,42 +772,85 @@ select {
 
     </div>
 
+
     <div class="grid">
 
       <div>
-        <label>اسم الموظف</label>
-        <input id="employeeName">
+
+        <label>
+          اسم الموظف
+        </label>
+
+        <input
+          id="employeeName">
+
       </div>
 
-      <div>
-        <label>كود الموظف</label>
-        <input id="employeeNumber">
-      </div>
 
       <div>
-        <label>رقم الهاتف</label>
-        <input id="employeePhone">
+
+        <label>
+          كود الموظف
+        </label>
+
+        <input
+          id="employeeNumber">
+
       </div>
 
-      <div>
-        <label>الوظيفة</label>
-        <input id="employeeJob">
-      </div>
 
       <div>
-        <label>الراتب الشهري</label>
+
+        <label>
+          رقم الهاتف
+        </label>
+
+        <input
+          id="employeePhone">
+
+      </div>
+
+
+      <div>
+
+        <label>
+          الوظيفة
+        </label>
+
+        <input
+          id="employeeJob">
+
+      </div>
+
+
+      <div>
+
+        <label>
+          الراتب الشهري
+        </label>
+
         <input
           id="employeeSalary"
           type="number"
           step="0.01">
+
       </div>
 
     </div>
 
-    <input id="employeeId" type="hidden">
-    <input id="employeeDailySalaryVisible" type="hidden">
+
+    <input
+      id="employeeId"
+      type="hidden">
+
+
+    <input
+      id="employeeDailySalaryVisible"
+      type="hidden">
+
 
     <br>
+
 
     <div class="actions">
 
@@ -592,6 +868,7 @@ select {
 
     </div>
 
+
     <div
       id="employeeStatus"
       class="status">
@@ -601,8 +878,13 @@ select {
 
 </div>
 
-<!-- مكتبة Supabase -->
+
+<!-- =====================================================
+     Supabase
+     ===================================================== -->
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 
 <script>
 
@@ -613,15 +895,8 @@ select {
 const SUPABASE_URL =
   "https://vbfxwvubdtypioshrcgf.supabase.co";
 
-/*
-   مهم:
-   اترك هنا Publishable Key الحقيقي الخاص بك.
-   لا تستخدم Secret Key.
-*/
-
 const SUPABASE_KEY =
   "sb_publishable_BS9niZgVNaN0c18_vVoE1w_BCqYkKyo";
-
 
 const supabaseClient =
   supabase.createClient(
@@ -642,43 +917,66 @@ function showTab(id, btn) {
   document
     .querySelectorAll(".section")
     .forEach(function(section) {
+
       section.classList.remove("active");
+
     });
+
 
   const target =
     document.getElementById(id);
 
+
   if (target) {
+
     target.classList.add("active");
+
   }
+
 
   document
     .querySelectorAll(".tabs button")
     .forEach(function(button) {
+
       button.classList.remove("active");
+
     });
 
+
   if (btn) {
+
     btn.classList.add("active");
+
   }
+
 
   if (id === "employees") {
+
     loadEmployees();
+
   }
+
 
   if (id === "attendance") {
+
     loadEmployees();
     loadAttendance();
+    updateAttendanceType();
+
   }
 
+
   if (id === "salaries") {
+
     loadSalaries();
+
   }
+
 }
 
 
 /* =====================================================
-   الانتقال للحضور من الصفحة الرئيسية
+   الانتقال للحضور
    ===================================================== */
 
 function goToAttendance(type) {
@@ -688,15 +986,18 @@ function goToAttendance(type) {
       '.tabs button[onclick*="attendance"]'
     );
 
+
   showTab(
     "attendance",
     attendanceButton
   );
 
+
   const status =
     document.getElementById(
       "attendanceStatus"
     );
+
 
   if (type === "in") {
 
@@ -719,15 +1020,21 @@ function goToAttendance(type) {
 
 function getToday() {
 
-  const d = new Date();
+  const d =
+    new Date();
+
 
   const month =
-    String(d.getMonth() + 1)
-      .padStart(2, "0");
+    String(
+      d.getMonth() + 1
+    ).padStart(2, "0");
+
 
   const day =
-    String(d.getDate())
-      .padStart(2, "0");
+    String(
+      d.getDate()
+    ).padStart(2, "0");
+
 
   return (
     d.getFullYear() +
@@ -736,6 +1043,32 @@ function getToday() {
     "-" +
     day
   );
+
+}
+
+
+/* =====================================================
+   الشهر الحالي
+   ===================================================== */
+
+function getCurrentMonth() {
+
+  const d =
+    new Date();
+
+
+  const month =
+    String(
+      d.getMonth() + 1
+    ).padStart(2, "0");
+
+
+  return (
+    d.getFullYear() +
+    "-" +
+    month
+  );
+
 }
 
 
@@ -752,6 +1085,7 @@ function getCurrentTime() {
         hour12: false
       }
     );
+
 }
 
 
@@ -769,6 +1103,7 @@ function money(value) {
         maximumFractionDigits: 2
       }
     );
+
 }
 
 
@@ -793,6 +1128,234 @@ function esc(value) {
 
       }
     );
+
+}
+
+
+/* =====================================================
+   اسم نوع الحضور
+   ===================================================== */
+
+function attendanceTypeName(type) {
+
+  const names = {
+
+    full_day:
+      "يوم كامل",
+
+    half_day:
+      "نصف يوم",
+
+    quarter_day:
+      "ربع يوم",
+
+    absent:
+      "غياب"
+
+  };
+
+
+  return names[type] || type || "-";
+
+}
+
+
+/* =====================================================
+   حساب الخصم
+   ===================================================== */
+
+function calculateDeduction(
+  employee,
+  attendanceType,
+  deductionEnabled
+) {
+
+  if (!employee) {
+    return 0;
+  }
+
+
+  const dailySalary =
+    Number(
+      employee.daily_salary || 0
+    );
+
+
+  if (attendanceType === "absent") {
+
+    return dailySalary;
+
+  }
+
+
+  if (
+    attendanceType === "half_day" &&
+    deductionEnabled
+  ) {
+
+    return dailySalary * 0.5;
+
+  }
+
+
+  if (
+    attendanceType === "quarter_day" &&
+    deductionEnabled
+  ) {
+
+    return dailySalary * 0.25;
+
+  }
+
+
+  return 0;
+
+}
+
+
+/* =====================================================
+   تحديث معاينة الخصم
+   ===================================================== */
+
+function updateDeductionPreview() {
+
+  const employeeId =
+    document.getElementById(
+      "attendanceEmployee"
+    ).value;
+
+
+  const type =
+    document.getElementById(
+      "attendanceType"
+    ).value;
+
+
+  const deductionEnabled =
+    document.getElementById(
+      "deductionEnabled"
+    ).value === "true";
+
+
+  const preview =
+    document.getElementById(
+      "deductionPreview"
+    );
+
+
+  const deductionBox =
+    document.getElementById(
+      "deductionChoiceBox"
+    );
+
+
+  if (type === "absent") {
+
+    deductionBox.style.display =
+      "none";
+
+  } else {
+
+    deductionBox.style.display =
+      "block";
+
+  }
+
+
+  const employee =
+    employeesCache.find(
+      function(item) {
+
+        return String(item.id) ===
+          String(employeeId);
+
+      }
+    );
+
+
+  if (!employee) {
+
+    preview.className =
+      "no-deduction-box";
+
+    preview.textContent =
+      "اختر الموظف لمعرفة قيمة الخصم.";
+
+    return;
+
+  }
+
+
+  const deduction =
+    calculateDeduction(
+      employee,
+      type,
+      type === "absent"
+        ? true
+        : deductionEnabled
+    );
+
+
+  const daily =
+    Number(
+      employee.daily_salary || 0
+    );
+
+
+  if (deduction > 0) {
+
+    preview.className =
+      "deduction-box";
+
+    preview.innerHTML =
+      "الأجر اليومي: <strong>" +
+      money(daily) +
+      " جنيه</strong><br>" +
+      "قيمة الخصم: <strong>" +
+      money(deduction) +
+      " جنيه</strong>";
+
+  } else {
+
+    preview.className =
+      "no-deduction-box";
+
+    preview.innerHTML =
+      "لا يوجد خصم على هذه الحالة.";
+
+  }
+
+}
+
+
+/* =====================================================
+   تحديث نوع الحضور
+   ===================================================== */
+
+function updateAttendanceType() {
+
+  const type =
+    document.getElementById(
+      "attendanceType"
+    ).value;
+
+
+  const choice =
+    document.getElementById(
+      "deductionEnabled"
+    );
+
+
+  if (type === "absent") {
+
+    choice.value =
+      "true";
+
+  }
+
+
+  updateDeductionPreview();
+
 }
 
 
@@ -807,21 +1370,25 @@ async function loadEmployees() {
       "employeesBody"
     );
 
+
   const select =
     document.getElementById(
       "attendanceEmployee"
     );
 
+
   if (!body) {
     return;
   }
 
+
   body.innerHTML =
     `<tr>
-      <td colspan="6">
+      <td colspan="7">
         جاري التحميل...
       </td>
     </tr>`;
+
 
   const response =
     await supabaseClient
@@ -834,18 +1401,21 @@ async function loadEmployees() {
         }
       );
 
+
   if (response.error) {
 
     body.innerHTML =
       `<tr>
-        <td colspan="6" class="error">
+        <td colspan="7" class="error">
           خطأ في تحميل الموظفين:
           ${esc(response.error.message)}
         </td>
       </tr>`;
 
     return;
+
   }
+
 
   employeesCache =
     response.data || [];
@@ -855,7 +1425,7 @@ async function loadEmployees() {
 
     body.innerHTML =
       `<tr>
-        <td colspan="6" class="empty">
+        <td colspan="7" class="empty">
           لا يوجد موظفون حتى الآن.
         </td>
       </tr>`;
@@ -887,6 +1457,11 @@ async function loadEmployees() {
 
               <td>
                 ${money(employee.basic_salary)}
+                جنيه
+              </td>
+
+              <td>
+                ${money(employee.daily_salary)}
                 جنيه
               </td>
 
@@ -935,13 +1510,17 @@ async function loadEmployees() {
 
         })
         .join("");
+
   }
+
+
+  updateDeductionPreview();
 
 }
 
 
 /* =====================================================
-   فتح نافذة إضافة موظف
+   فتح نافذة موظف
    ===================================================== */
 
 function openEmployeeModal() {
@@ -951,41 +1530,51 @@ function openEmployeeModal() {
   ).textContent =
     "إضافة موظف";
 
+
   document.getElementById(
     "employeeId"
   ).value = "";
+
 
   document.getElementById(
     "employeeName"
   ).value = "";
 
+
   document.getElementById(
     "employeeNumber"
   ).value = "";
+
 
   document.getElementById(
     "employeePhone"
   ).value = "";
 
+
   document.getElementById(
     "employeeJob"
   ).value = "";
+
 
   document.getElementById(
     "employeeSalary"
   ).value = "";
 
+
   document.getElementById(
     "employeeDailySalaryVisible"
   ).value = "";
+
 
   document.getElementById(
     "employeeStatus"
   ).textContent = "";
 
+
   document.getElementById(
     "employeeModal"
   ).classList.add("show");
+
 }
 
 
@@ -998,6 +1587,7 @@ function closeEmployeeModal() {
   document.getElementById(
     "employeeModal"
   ).classList.remove("show");
+
 }
 
 
@@ -1017,60 +1607,75 @@ function editEmployee(id) {
       }
     );
 
+
   if (!employee) {
 
-    alert("لم يتم العثور على الموظف.");
+    alert(
+      "لم يتم العثور على الموظف."
+    );
+
     return;
 
   }
+
 
   document.getElementById(
     "modalTitle"
   ).textContent =
     "تعديل الموظف";
 
+
   document.getElementById(
     "employeeId"
   ).value =
     employee.id;
+
 
   document.getElementById(
     "employeeName"
   ).value =
     employee.name || "";
 
+
   document.getElementById(
     "employeeNumber"
   ).value =
     employee.employee_number || "";
+
 
   document.getElementById(
     "employeePhone"
   ).value =
     employee.phone || "";
 
+
   document.getElementById(
     "employeeJob"
   ).value =
     employee.job || "";
+
 
   document.getElementById(
     "employeeSalary"
   ).value =
     employee.basic_salary || "";
 
+
   document.getElementById(
     "employeeDailySalaryVisible"
   ).value =
     employee.daily_salary || "";
 
+
   document.getElementById(
     "employeeStatus"
   ).textContent = "";
 
+
   document.getElementById(
     "employeeModal"
   ).classList.add("show");
+
 }
 
 
@@ -1085,25 +1690,30 @@ async function saveEmployee() {
       "employeeStatus"
     );
 
+
   const name =
     document.getElementById(
       "employeeName"
     ).value.trim();
+
 
   const employeeNumber =
     document.getElementById(
       "employeeNumber"
     ).value.trim();
 
+
   const phone =
     document.getElementById(
       "employeePhone"
     ).value.trim();
 
+
   const job =
     document.getElementById(
       "employeeJob"
     ).value.trim();
+
 
   const monthlySalary =
     Number(
@@ -1112,10 +1722,12 @@ async function saveEmployee() {
       ).value || 0
     );
 
+
   const employeeId =
     document.getElementById(
       "employeeId"
     ).value;
+
 
   const dailySalary =
     monthlySalary / 30;
@@ -1127,6 +1739,7 @@ async function saveEmployee() {
       "اكتب اسم الموظف وكود الموظف.";
 
     return;
+
   }
 
 
@@ -1192,25 +1805,31 @@ async function saveEmployee() {
       response.error.message;
 
     return;
+
   }
 
 
   status.textContent =
     "تم حفظ الموظف بنجاح.";
 
+
   await loadEmployees();
+
 
   setTimeout(
     function() {
+
       closeEmployeeModal();
+
     },
     700
   );
+
 }
 
 
 /* =====================================================
-   حذف موظف
+   حذف الموظف
    ===================================================== */
 
 async function deleteEmployee(id) {
@@ -1218,10 +1837,13 @@ async function deleteEmployee(id) {
   const employee =
     employeesCache.find(
       function(item) {
+
         return String(item.id) ===
           String(id);
+
       }
     );
+
 
   if (!employee) {
     return;
@@ -1234,6 +1856,7 @@ async function deleteEmployee(id) {
       employee.name +
       " ؟"
     );
+
 
   if (!confirmed) {
     return;
@@ -1258,12 +1881,70 @@ async function deleteEmployee(id) {
     );
 
     return;
+
   }
 
 
   await loadEmployees();
 
-  alert("تم حذف الموظف.");
+
+  alert(
+    "تم حذف الموظف."
+  );
+
+}
+
+
+/* =====================================================
+   البحث عن سجل الحضور
+   ===================================================== */
+
+async function findAttendance(
+  employeeId,
+  date
+) {
+
+  const response =
+    await supabaseClient
+      .from("attendance")
+      .select("*")
+      .eq(
+        "employee_id",
+        Number(employeeId)
+      )
+      .eq(
+        "attendance_date",
+        date
+      )
+      .order(
+        "id",
+        {
+          ascending: false
+        }
+      )
+      .limit(1);
+
+
+  if (response.error) {
+
+    return {
+      data: null,
+      error: response.error
+    };
+
+  }
+
+
+  return {
+    data:
+      response.data &&
+      response.data.length
+        ? response.data[0]
+        : null,
+
+    error: null
+  };
+
 }
 
 
@@ -1278,13 +1959,16 @@ async function registerCheckIn() {
       "attendanceEmployee"
     );
 
+
   const status =
     document.getElementById(
       "attendanceStatus"
     );
 
+
   const employeeId =
     select.value;
+
 
   const date =
     document.getElementById(
@@ -1299,6 +1983,7 @@ async function registerCheckIn() {
       "من فضلك اختر الموظف أولًا.";
 
     return;
+
   }
 
 
@@ -1307,18 +1992,10 @@ async function registerCheckIn() {
 
 
   const existing =
-    await supabaseClient
-      .from("attendance")
-      .select("*")
-      .eq(
-        "employee_id",
-        Number(employeeId)
-      )
-      .eq(
-        "attendance_date",
-        date
-      )
-      .maybeSingle();
+    await findAttendance(
+      employeeId,
+      date
+    );
 
 
   if (existing.error) {
@@ -1328,6 +2005,7 @@ async function registerCheckIn() {
       existing.error.message;
 
     return;
+
   }
 
 
@@ -1340,8 +2018,13 @@ async function registerCheckIn() {
       await supabaseClient
         .from("attendance")
         .update({
-          check_in: time,
-          status: "present"
+
+          check_in:
+            time,
+
+          status:
+            "present"
+
         })
         .eq(
           "id",
@@ -1353,21 +2036,30 @@ async function registerCheckIn() {
     response =
       await supabaseClient
         .from("attendance")
-        .insert([
-          {
-            employee_id:
-              Number(employeeId),
+        .insert([{
 
-            attendance_date:
-              date,
+          employee_id:
+            Number(employeeId),
 
-            status:
-              "present",
+          attendance_date:
+            date,
 
-            check_in:
-              time
-          }
-        ]);
+          status:
+            "present",
+
+          attendance_type:
+            "full_day",
+
+          deduction_enabled:
+            false,
+
+          deduction_amount:
+            0,
+
+          check_in:
+            time
+
+        }]);
 
   }
 
@@ -1379,6 +2071,7 @@ async function registerCheckIn() {
       response.error.message;
 
     return;
+
   }
 
 
@@ -1386,13 +2079,16 @@ async function registerCheckIn() {
     "تم تسجيل الدخول الساعة " +
     time;
 
+
   document.getElementById(
     "homeStatus"
   ).textContent =
     "تم تسجيل الدخول الساعة " +
     time;
 
+
   await loadAttendance();
+
 }
 
 
@@ -1407,13 +2103,16 @@ async function registerCheckOut() {
       "attendanceEmployee"
     );
 
+
   const status =
     document.getElementById(
       "attendanceStatus"
     );
 
+
   const employeeId =
     select.value;
+
 
   const date =
     document.getElementById(
@@ -1428,6 +2127,7 @@ async function registerCheckOut() {
       "من فضلك اختر الموظف أولًا.";
 
     return;
+
   }
 
 
@@ -1436,18 +2136,10 @@ async function registerCheckOut() {
 
 
   const existing =
-    await supabaseClient
-      .from("attendance")
-      .select("*")
-      .eq(
-        "employee_id",
-        Number(employeeId)
-      )
-      .eq(
-        "attendance_date",
-        date
-      )
-      .maybeSingle();
+    await findAttendance(
+      employeeId,
+      date
+    );
 
 
   if (existing.error) {
@@ -1457,6 +2149,7 @@ async function registerCheckOut() {
       existing.error.message;
 
     return;
+
   }
 
 
@@ -1466,6 +2159,7 @@ async function registerCheckOut() {
       "لا يوجد تسجيل دخول لهذا الموظف اليوم.";
 
     return;
+
   }
 
 
@@ -1475,6 +2169,7 @@ async function registerCheckOut() {
       "لا يوجد وقت دخول مسجل.";
 
     return;
+
   }
 
 
@@ -1482,7 +2177,10 @@ async function registerCheckOut() {
     await supabaseClient
       .from("attendance")
       .update({
-        check_out: time
+
+        check_out:
+          time
+
       })
       .eq(
         "id",
@@ -1497,6 +2195,7 @@ async function registerCheckOut() {
       response.error.message;
 
     return;
+
   }
 
 
@@ -1504,13 +2203,191 @@ async function registerCheckOut() {
     "تم تسجيل الخروج الساعة " +
     time;
 
+
   document.getElementById(
     "homeStatus"
   ).textContent =
     "تم تسجيل الخروج الساعة " +
     time;
 
+
   await loadAttendance();
+
+}
+
+
+/* =====================================================
+   حفظ حالة الحضور
+   ===================================================== */
+
+async function saveAttendanceType() {
+
+  const employeeId =
+    document.getElementById(
+      "attendanceEmployee"
+    ).value;
+
+
+  const date =
+    document.getElementById(
+      "attendanceDate"
+    ).value ||
+    getToday();
+
+
+  const type =
+    document.getElementById(
+      "attendanceType"
+    ).value;
+
+
+  const deductionEnabled =
+    type === "absent"
+      ? true
+      : document.getElementById(
+          "deductionEnabled"
+        ).value === "true";
+
+
+  const status =
+    document.getElementById(
+      "attendanceStatus"
+    );
+
+
+  if (!employeeId) {
+
+    status.textContent =
+      "من فضلك اختر الموظف أولًا.";
+
+    return;
+
+  }
+
+
+  const employee =
+    employeesCache.find(
+      function(item) {
+
+        return String(item.id) ===
+          String(employeeId);
+
+      }
+    );
+
+
+  if (!employee) {
+
+    status.textContent =
+      "لم يتم العثور على الموظف.";
+
+    return;
+
+  }
+
+
+  const deduction =
+    calculateDeduction(
+      employee,
+      type,
+      deductionEnabled
+    );
+
+
+  status.textContent =
+    "جاري حفظ حالة الحضور...";
+
+
+  const existing =
+    await findAttendance(
+      employeeId,
+      date
+    );
+
+
+  if (existing.error) {
+
+    status.textContent =
+      "خطأ: " +
+      existing.error.message;
+
+    return;
+
+  }
+
+
+  const attendanceData = {
+
+    employee_id:
+      Number(employeeId),
+
+    attendance_date:
+      date,
+
+    status:
+      type === "absent"
+        ? "absent"
+        : "present",
+
+    attendance_type:
+      type,
+
+    deduction_enabled:
+      deductionEnabled,
+
+    deduction_amount:
+      deduction
+
+  };
+
+
+  let response;
+
+
+  if (existing.data) {
+
+    response =
+      await supabaseClient
+        .from("attendance")
+        .update(
+          attendanceData
+        )
+        .eq(
+          "id",
+          existing.data.id
+        );
+
+  } else {
+
+    response =
+      await supabaseClient
+        .from("attendance")
+        .insert([
+          attendanceData
+        ]);
+
+  }
+
+
+  if (response.error) {
+
+    status.textContent =
+      "خطأ في حفظ حالة الحضور: " +
+      response.error.message;
+
+    return;
+
+  }
+
+
+  status.textContent =
+    "تم حفظ حالة الحضور بنجاح. الخصم: " +
+    money(deduction) +
+    " جنيه";
+
+
+  await loadAttendance();
+
 }
 
 
@@ -1525,9 +2402,18 @@ async function loadAttendance() {
       "attendanceBody"
     );
 
+
   if (!body) {
     return;
   }
+
+
+  body.innerHTML =
+    `<tr>
+      <td colspan="8">
+        جاري التحميل...
+      </td>
+    </tr>`;
 
 
   const response =
@@ -1558,13 +2444,14 @@ async function loadAttendance() {
 
     body.innerHTML =
       `<tr>
-        <td colspan="6" class="error">
+        <td colspan="8" class="error">
           خطأ:
           ${esc(response.error.message)}
         </td>
       </tr>`;
 
     return;
+
   }
 
 
@@ -1576,12 +2463,13 @@ async function loadAttendance() {
 
     body.innerHTML =
       `<tr>
-        <td colspan="6" class="empty">
+        <td colspan="8" class="empty">
           لا يوجد سجل حضور حتى الآن.
         </td>
       </tr>`;
 
     return;
+
   }
 
 
@@ -1613,15 +2501,36 @@ async function loadAttendance() {
             </td>
 
             <td>
-              ${esc(row.status)}
+              ${row.status === "absent"
+                ? "غياب"
+                : "حاضر"}
             </td>
 
             <td>
-              ${esc(row.check_in || "-")}
+              ${esc(
+                attendanceTypeName(
+                  row.attendance_type
+                )
+              )}
             </td>
 
             <td>
-              ${esc(row.check_out || "-")}
+              ${money(
+                row.deduction_amount
+              )}
+              جنيه
+            </td>
+
+            <td>
+              ${esc(
+                row.check_in || "-"
+              )}
+            </td>
+
+            <td>
+              ${esc(
+                row.check_out || "-"
+              )}
             </td>
 
           </tr>
@@ -1629,6 +2538,153 @@ async function loadAttendance() {
 
       })
       .join("");
+
+}
+
+
+/* =====================================================
+   حساب بيانات راتب موظف
+   ===================================================== */
+
+function calculateSalaryData(
+  employee,
+  attendanceRows,
+  month
+) {
+
+  const basicSalary =
+    Number(
+      employee.basic_salary || 0
+    );
+
+
+  let attendanceDays = 0;
+
+  let halfDays = 0;
+
+  let quarterDays = 0;
+
+  let absentDays = 0;
+
+  let attendanceAmount = 0;
+
+
+  attendanceRows.forEach(
+    function(row) {
+
+      const type =
+        row.attendance_type ||
+        "full_day";
+
+
+      if (type === "full_day") {
+
+        attendanceDays += 1;
+
+      }
+
+
+      if (type === "half_day") {
+
+        halfDays += 1;
+
+      }
+
+
+      if (type === "quarter_day") {
+
+        quarterDays += 1;
+
+      }
+
+
+      if (type === "absent") {
+
+        absentDays += 1;
+
+      }
+
+
+      attendanceAmount +=
+        Number(
+          row.deduction_amount || 0
+        );
+
+    }
+  );
+
+
+  const allowances = 0;
+
+  const advances = 0;
+
+  const otherDeductions = 0;
+
+
+  const totalDeductions =
+    attendanceAmount +
+    advances +
+    otherDeductions;
+
+
+  const netSalary =
+    basicSalary +
+    allowances -
+    totalDeductions;
+
+
+  return {
+
+    month:
+
+      month,
+
+    basicSalary:
+
+      basicSalary,
+
+    attendanceDays:
+
+      attendanceDays,
+
+    halfDays:
+
+      halfDays,
+
+    quarterDays:
+
+      quarterDays,
+
+    absentDays:
+
+      absentDays,
+
+    attendanceAmount:
+
+      attendanceAmount,
+
+    allowances:
+
+      allowances,
+
+    advances:
+
+      advances,
+
+    otherDeductions:
+
+      otherDeductions,
+
+    totalDeductions:
+
+      totalDeductions,
+
+    netSalary:
+
+      netSalary
+
+  };
+
 }
 
 
@@ -1643,93 +2699,204 @@ async function loadSalaries() {
       "salariesBody"
     );
 
+
   if (!body) {
     return;
   }
 
 
-  const response =
-    await supabaseClient
-      .from("salaries")
-      .select(`
-        *,
-        employees (
-          name,
-          employee_number
-        )
-      `)
-      .order(
-        "id",
-        {
-          ascending: false
-        }
-      );
+  let month =
+    document.getElementById(
+      "salaryMonth"
+    ).value;
 
 
-  if (response.error) {
+  if (!month) {
 
-    body.innerHTML =
-      `<tr>
-        <td colspan="6" class="error">
-          خطأ:
-          ${esc(response.error.message)}
-        </td>
-      </tr>`;
+    month =
+      getCurrentMonth();
 
-    return;
-  }
+    document.getElementById(
+      "salaryMonth"
+    ).value =
+      month;
 
-
-  const rows =
-    response.data || [];
-
-
-  if (!rows.length) {
-
-    body.innerHTML =
-      `<tr>
-        <td colspan="6" class="empty">
-          لا توجد رواتب مسجلة حتى الآن.
-        </td>
-      </tr>`;
-
-    return;
   }
 
 
   body.innerHTML =
-    rows
-      .map(function(row) {
+    `<tr>
+      <td colspan="11">
+        جاري حساب الرواتب...
+      </td>
+    </tr>`;
+
+
+  const employeesResponse =
+    await supabaseClient
+      .from("employees")
+      .select("*")
+      .order(
+        "id",
+        {
+          ascending: true
+        }
+      );
+
+
+  if (employeesResponse.error) {
+
+    body.innerHTML =
+      `<tr>
+        <td colspan="11" class="error">
+          خطأ في تحميل الموظفين:
+          ${esc(
+            employeesResponse.error.message
+          )}
+        </td>
+      </tr>`;
+
+    return;
+
+  }
+
+
+  const attendanceResponse =
+    await supabaseClient
+      .from("attendance")
+      .select("*")
+      .gte(
+        "attendance_date",
+        month + "-01"
+      )
+      .lt(
+        "attendance_date",
+        getNextMonth(month)
+      );
+
+
+  if (attendanceResponse.error) {
+
+    body.innerHTML =
+      `<tr>
+        <td colspan="11" class="error">
+          خطأ في تحميل الحضور:
+          ${esc(
+            attendanceResponse.error.message
+          )}
+        </td>
+      </tr>`;
+
+    return;
+
+  }
+
+
+  const employees =
+    employeesResponse.data || [];
+
+
+  const attendance =
+    attendanceResponse.data || [];
+
+
+  if (!employees.length) {
+
+    body.innerHTML =
+      `<tr>
+        <td colspan="11" class="empty">
+          لا يوجد موظفون.
+        </td>
+      </tr>`;
+
+    return;
+
+  }
+
+
+  body.innerHTML =
+    employees
+      .map(function(employee) {
+
+        const employeeAttendance =
+          attendance.filter(
+            function(row) {
+
+              return Number(
+                row.employee_id
+              ) === Number(
+                employee.id
+              );
+
+            }
+          );
+
+
+        const salary =
+          calculateSalaryData(
+            employee,
+            employeeAttendance,
+            month
+          );
+
 
         return `
           <tr>
 
             <td>
-              ${esc(row.month)}
+              ${esc(month)}
             </td>
 
             <td>
-              ${esc(
-                row.employees
-                  ? row.employees.name
-                  : ""
+              ${esc(employee.name)}
+            </td>
+
+            <td>
+              ${money(
+                salary.basicSalary
               )}
             </td>
 
             <td>
-              ${money(row.basic_salary)}
+              ${salary.attendanceDays}
             </td>
 
             <td>
-              ${money(row.allowances)}
+              ${salary.halfDays}
             </td>
 
             <td>
-              ${money(row.deductions)}
+              ${salary.quarterDays}
             </td>
 
             <td>
-              ${money(row.net_salary)}
+              ${salary.absentDays}
+            </td>
+
+            <td>
+              ${money(
+                salary.attendanceAmount
+              )}
+            </td>
+
+            <td>
+              ${money(
+                salary.allowances
+              )}
+            </td>
+
+            <td>
+              ${money(
+                salary.totalDeductions
+              )}
+            </td>
+
+            <td>
+              <strong>
+                ${money(
+                  salary.netSalary
+                )}
+              </strong>
             </td>
 
           </tr>
@@ -1737,11 +2904,53 @@ async function loadSalaries() {
 
       })
       .join("");
+
 }
 
 
 /* =====================================================
-   تشغيل الصفحة
+   الشهر التالي
+   ===================================================== */
+
+function getNextMonth(month) {
+
+  const parts =
+    month.split("-");
+
+
+  let year =
+    Number(parts[0]);
+
+
+  let monthNumber =
+    Number(parts[1]);
+
+
+  monthNumber++;
+
+
+  if (monthNumber > 12) {
+
+    monthNumber = 1;
+
+    year++;
+
+  }
+
+
+  return (
+    year +
+    "-" +
+    String(monthNumber)
+      .padStart(2, "0") +
+    "-01"
+  );
+
+}
+
+
+/* =====================================================
+   تغيير شهر الراتب
    ===================================================== */
 
 document.addEventListener(
@@ -1753,10 +2962,58 @@ document.addEventListener(
         "attendanceDate"
       );
 
+
     if (dateInput) {
+
       dateInput.value =
         getToday();
+
     }
+
+
+    const salaryMonth =
+      document.getElementById(
+        "salaryMonth"
+      );
+
+
+    if (salaryMonth) {
+
+      salaryMonth.value =
+        getCurrentMonth();
+
+
+      salaryMonth.addEventListener(
+        "change",
+        function() {
+
+          loadSalaries();
+
+        }
+      );
+
+    }
+
+
+    const attendanceEmployee =
+      document.getElementById(
+        "attendanceEmployee"
+      );
+
+
+    if (attendanceEmployee) {
+
+      attendanceEmployee.addEventListener(
+        "change",
+        function() {
+
+          updateDeductionPreview();
+
+        }
+      );
+
+    }
+
 
     loadEmployees();
 
