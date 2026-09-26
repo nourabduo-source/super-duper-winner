@@ -1975,6 +1975,128 @@ async function saveAttendance(){
   }
 
 
-  /*
+    /*
     نبحث عن سجل لنفس الموظف في نفس اليوم.
-    إذا وجدناه
+    إذا وجدناه نعدله، وإذا لم نجده ننشئ سجلًا جديدًا.
+  */
+
+  const record = {
+
+    employee_id: Number(employeeId),
+
+    attendance_date: attendanceDate,
+
+    status: status,
+
+    attendance_type: attendanceType,
+
+    deduction_enabled: deductionEnabled,
+
+    deduction_amount: deductionAmount,
+
+    check_in: checkIn,
+
+    check_out: checkOut,
+
+    notes: notes
+
+  };
+
+
+  const {
+    data: existingRecord,
+    error: searchError
+  } = await supabaseClient
+
+    .from("attendance")
+
+    .select("id")
+
+    .eq(
+      "employee_id",
+      Number(employeeId)
+    )
+
+    .eq(
+      "attendance_date",
+      attendanceDate
+    )
+
+    .maybeSingle();
+
+
+  if (searchError) {
+
+    console.error(
+      "Attendance search error:",
+      searchError
+    );
+
+    showMessage(
+      "حدث خطأ أثناء البحث عن سجل الحضور",
+      "error"
+    );
+
+    return;
+  }
+
+
+  let result;
+
+
+  if (existingRecord) {
+
+    result = await supabaseClient
+
+      .from("attendance")
+
+      .update(record)
+
+      .eq(
+        "id",
+        existingRecord.id
+      );
+
+  } else {
+
+    result = await supabaseClient
+
+      .from("attendance")
+
+      .insert([record]);
+
+  }
+
+
+  if (result.error) {
+
+    console.error(
+      "Attendance save error:",
+      result.error
+    );
+
+    showMessage(
+      "حدث خطأ أثناء حفظ الحضور: " +
+      result.error.message,
+      "error"
+    );
+
+    return;
+  }
+
+
+  showMessage(
+    "تم حفظ الحضور بنجاح",
+    "success"
+  );
+
+
+  closeAttendanceModal();
+
+
+  await loadAttendance();
+
+
+  await loadEmployees();
+
+}
