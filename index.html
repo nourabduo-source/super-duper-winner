@@ -121,6 +121,33 @@ th,td{font-size:13px}.tabs button{flex:1}.big-action{width:100%}
 <h2 style="margin:0">الموظفون</h2>
 <button class="primary" onclick="openEmployeeModal()">+ إضافة موظف</button>
 </div>
+
+<br>
+
+<div class="grid">
+
+<div>
+<label>بحث عن موظف</label>
+<input
+id="employeeSearch"
+type="text"
+placeholder="ابحث بالاسم أو الكود أو الهاتف..."
+oninput="filterEmployees()">
+</div>
+
+<div>
+<label>الوظيفة</label>
+<select id="employeeJobFilter" onchange="filterEmployees()">
+<option value="">كل الوظائف</option>
+</select>
+</div>
+
+</div>
+
+<div id="employeeSearchStatus" class="status">
+عدد الموظفين: 0
+</div>
+
 </div>
 
 <div class="card table-wrap">
@@ -639,7 +666,25 @@ return;
 }
 
 employeesCache=response.data||[];
+const jobFilter=document.getElementById("employeeJobFilter");
 
+if(jobFilter){
+
+const jobs=[
+...new Set(
+employeesCache
+.map(e=>String(e.job||"").trim())
+.filter(Boolean)
+)
+].sort();
+
+jobFilter.innerHTML=
+`<option value="">كل الوظائف</option>`+
+jobs.map(job=>
+`<option value="${esc(job)}">${esc(job)}</option>`
+).join("");
+
+}
 if(!employeesCache.length){
 
 body.innerHTML=
@@ -688,6 +733,89 @@ employeesCache.map(e=>
 updateDeductionPreview();
 }
 
+  /* =========================
+   البحث عن الموظفين
+========================= */
+
+function filterEmployees(){
+
+const search=
+(document.getElementById("employeeSearch")?.value||"")
+.trim()
+.toLowerCase();
+
+const job=
+(document.getElementById("employeeJobFilter")?.value||"")
+.trim();
+
+const body=document.getElementById("employeesBody");
+const status=document.getElementById("employeeSearchStatus");
+
+const filtered=employeesCache.filter(e=>{
+
+const name=String(e.name||"").toLowerCase();
+const number=String(e.employee_number||"").toLowerCase();
+const phone=String(e.phone||"").toLowerCase();
+const employeeJob=String(e.job||"");
+
+const matchesSearch=
+!search||
+name.includes(search)||
+number.includes(search)||
+phone.includes(search);
+
+const matchesJob=
+!job||employeeJob===job;
+
+return matchesSearch&&matchesJob;
+
+});
+
+if(!filtered.length){
+
+body.innerHTML=
+`<tr><td colspan="7" class="empty">لا توجد نتائج مطابقة للبحث.</td></tr>`;
+
+}else{
+
+body.innerHTML=filtered.map(e=>`
+
+<tr>
+<td>${esc(e.name)}</td>
+<td>${esc(e.employee_number)}</td>
+<td>${esc(e.phone)}</td>
+<td>${esc(e.job)}</td>
+<td>${money(e.basic_salary)} جنيه</td>
+<td>${money(e.daily_salary)} جنيه</td>
+<td>
+
+<button class="primary"
+onclick="editEmployee(${e.id})">
+تعديل
+</button>
+
+<button class="danger"
+onclick="deleteEmployee(${e.id})">
+حذف
+</button>
+
+</td>
+</tr>
+
+`).join("");
+
+}
+
+if(status){
+
+status.textContent=
+"عدد النتائج: "+filtered.length+
+" من "+employeesCache.length+" موظف";
+
+}
+
+}
+  
 /* =========================
    الموظف - إضافة وتعديل
 ========================= */
