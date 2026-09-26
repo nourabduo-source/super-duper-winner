@@ -2074,17 +2074,17 @@ async function loadMonthlyAttendanceReport(){
 
   if(employeesError){
 
-    body.innerHTML = `
-  <tr>
-    <td colspan="7" style="padding:20px;color:red;">
-      خطأ في تحميل الحضور: ${esc(attendanceError.message || "خطأ غير معروف")}
-    </td>
-  </tr>
-`;
+  body.innerHTML = `
+    <tr>
+      <td colspan="7" style="padding:20px;color:red;">
+        خطأ في تحميل الموظفين: ${esc(employeesError.message || "خطأ غير معروف")}
+      </td>
+    </tr>
+  `;
 
-console.error(attendanceError);
-return;
-  }
+  console.error(employeesError);
+  return;
+}
 
   const { data: attendance, error: attendanceError } =
     await supabaseClient
