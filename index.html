@@ -901,11 +901,15 @@ if(duplicateEmployee && duplicateEmployee.length > 0){
   return;
 }
 
+const branchId =
+document.getElementById("employeeBranch").value;
+
 const data={
 name,
 employee_number:number,
 phone,
 job,
+branch_id:branchId ? Number(branchId) : null,
 basic_salary:salary,
 daily_salary:salary/30,
 pay_type:"monthly"
