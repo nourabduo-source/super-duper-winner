@@ -857,6 +857,7 @@ document.getElementById("modalTitle").textContent="تعديل الموظف";
 document.getElementById("employeeId").value=e.id;
 document.getElementById("employeeName").value=e.name||"";
 document.getElementById("employeeNumber").value=e.employee_number||"";
+document.getElementById("employeeBranch").value=e.branch_id ? String(e.branch_id) : "";  
 document.getElementById("employeePhone").value=e.phone||"";
 document.getElementById("employeeJob").value=e.job||"";
 document.getElementById("employeeSalary").value=e.basic_salary||"";
