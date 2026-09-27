@@ -2089,7 +2089,7 @@ const endDate = nextMonth;
     .select("*")
     .gte("attendance_date", startDate)
     .lt("attendance_date", endDate);
-
+body.innerHTML = `<tr><td colspan="7" style="padding:20px;">تم تحميل الحضور: ${attendance ? attendance.length : 0} سجل</td></tr>`;
 
   if(attendanceError){
 
