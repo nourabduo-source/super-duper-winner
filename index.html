@@ -2084,11 +2084,13 @@ const endDate = nextMonth;
 }
 
   const { data: attendance, error: attendanceError } =
-    await supabaseClient
-      .from("attendance")
-      .select("*")
-      .gte("attendance_date", startDate)
-      .lt("attendance_date", endDate);
+  await supabaseClient
+    .from("attendance")
+    .select("*")
+    .gte("attendance_date", startDate)
+    .lt("attendance_date", endDate);
+
+console.log("ATTENDANCE TEST:", attendance, attendanceError);
 
   if(attendanceError){
 
