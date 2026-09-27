@@ -2113,8 +2113,13 @@ async function loadMonthlyAttendanceReport(){
   let totalQuarter = 0;
   let totalDeductions = 0;
 
-  body.innerHTML = employees.map(employee => {
-
+  body.innerHTML = `
+  <tr>
+    <td colspan="7" style="padding:20px;">
+      عدد الموظفين: ${employees.length}
+    </td>
+  </tr>
+`;
     const rows = attendance.filter(
       row => Number(row.employee_id) === Number(employee.id)
     );
