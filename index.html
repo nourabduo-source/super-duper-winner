@@ -1166,6 +1166,7 @@ return;
 
 const data={
 employee_id:Number(employeeId),
+branch_id:employee.branch_id ? Number(employee.branch_id) : null,
 attendance_date:date,
 status:type==="absent"?"absent":"present",
 attendance_type:type,
