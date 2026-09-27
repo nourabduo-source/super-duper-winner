@@ -2049,7 +2049,7 @@ async function loadMonthlyAttendanceReport(){
 
   document.getElementById("monthlyReportMonth").value = month;
 
-  const startDate = month + "-01";
+  const endDate = nextMonth;
 
   const nextMonth = getNextMonth(month);
 
