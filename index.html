@@ -1885,7 +1885,29 @@ printSalary(data);
 /* =========================
    لوحة التحكم
 ========================= */
+async function loadEmployeeBranches(){
 
+const select=document.getElementById("employeeBranch");
+
+if(!select)return;
+
+const response=await supabaseClient
+.from("branches")
+.select("id,name")
+.eq("active",true)
+.order("id",{ascending:true});
+
+if(response.error){
+console.error(response.error);
+return;
+}
+
+select.innerHTML=
+'<option value="">اختر الفرع</option>'+
+(response.data||[]).map(branch=>
+`<option value="${branch.id}">${esc(branch.name)}</option>`
+).join("");
+  }
 async function loadDashboard(){
 
 const employeesBox=document.getElementById("dashboardEmployees");
@@ -1980,6 +2002,7 @@ document.getElementById(id)
 });
 
 loadEmployees();
+loadEmployeeBranches();
 loadDashboard();
 
 });
