@@ -1084,6 +1084,7 @@ response=await supabaseClient
 .from("attendance")
 .insert([{
 employee_id:Number(employeeId),
+branch_id:Number(employeesCache.find(e=>String(e.id)===String(employeeId)).branch_id),  
 attendance_date:date,
 status:"present",
 attendance_type:"full_day",
