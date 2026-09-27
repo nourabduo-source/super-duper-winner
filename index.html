@@ -2296,6 +2296,186 @@ document.addEventListener("DOMContentLoaded",function(){
 });
 
 </script>
+<!-- شاشة تسجيل الدخول -->
+<div id="loginScreen" style="
+  position:fixed;
+  inset:0;
+  background:#f5f7fa;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:99999;
+  direction:rtl;
+">
+  <div style="
+    width:90%;
+    max-width:400px;
+    background:white;
+    padding:30px;
+    border-radius:16px;
+    box-shadow:0 5px 25px rgba(0,0,0,.15);
+    text-align:center;
+  ">
 
+    <h2>تسجيل الدخول</h2>
+
+    <p style="color:#666;">
+      نظام إدارة الموظفين
+    </p>
+
+    <input
+      id="loginEmail"
+      type="email"
+      placeholder="البريد الإلكتروني"
+      style="
+        width:100%;
+        padding:13px;
+        margin:8px 0;
+        border:1px solid #ddd;
+        border-radius:8px;
+        font-size:16px;
+      "
+    >
+
+    <input
+      id="loginPassword"
+      type="password"
+      placeholder="كلمة المرور"
+      style="
+        width:100%;
+        padding:13px;
+        margin:8px 0;
+        border:1px solid #ddd;
+        border-radius:8px;
+        font-size:16px;
+      "
+    >
+
+    <button
+      onclick="loginToSystem()"
+      style="
+        width:100%;
+        padding:13px;
+        margin-top:10px;
+        border:0;
+        border-radius:8px;
+        background:#2563eb;
+        color:white;
+        font-size:16px;
+        cursor:pointer;
+      "
+    >
+      دخول
+    </button>
+
+    <div
+      id="loginMessage"
+      style="
+        margin-top:15px;
+        color:#d00;
+        font-size:14px;
+      "
+    ></div>
+
+  </div>
+</div>
+
+<script>
+
+async function loginToSystem(){
+
+  const email =
+    document.getElementById("loginEmail").value.trim();
+
+  const password =
+    document.getElementById("loginPassword").value;
+
+  const message =
+    document.getElementById("loginMessage");
+
+  if(!email || !password){
+
+    message.textContent =
+      "اكتب البريد الإلكتروني وكلمة المرور.";
+
+    return;
+  }
+
+  message.style.color = "#333";
+  message.textContent = "جاري تسجيل الدخول...";
+
+  const { data, error } =
+    await supabaseClient.auth.signInWithPassword({
+      email: email,
+      password: password
+    });
+
+  if(error){
+
+    message.style.color = "#d00";
+    message.textContent =
+      "بيانات الدخول غير صحيحة.";
+
+    console.error(error);
+
+    return;
+  }
+
+  document.getElementById("loginScreen").style.display = "none";
+
+  message.textContent = "";
+}
+
+
+async function checkLogin(){
+
+  const {
+    data: { session }
+  } = await supabaseClient.auth.getSession();
+
+  if(session){
+
+    document.getElementById("loginScreen").style.display = "none";
+
+  }else{
+
+    document.getElementById("loginScreen").style.display = "flex";
+
+  }
+}
+
+
+supabaseClient.auth.onAuthStateChange(
+  function(event, session){
+
+    const screen =
+      document.getElementById("loginScreen");
+
+    if(!screen) return;
+
+    if(session){
+
+      screen.style.display = "none";
+
+    }else{
+
+      screen.style.display = "flex";
+
+    }
+
+  }
+);
+
+
+document.addEventListener(
+  "DOMContentLoaded",
+  function(){
+
+    checkLogin();
+
+  }
+);
+
+</script>
 </body>
 </html>
