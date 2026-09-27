@@ -2090,7 +2090,7 @@ const endDate = nextMonth;
     .gte("attendance_date", startDate)
     .lt("attendance_date", endDate);
 
-console.log("ATTENDANCE TEST:", attendance, attendanceError);
+body.innerHTML = `<tr><td colspan="7" style="padding:20px;">تم الوصول لبيانات الحضور: ${attendance ? attendance.length : 0} سجل</td></tr>`;
 
   if(attendanceError){
 
