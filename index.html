@@ -2051,6 +2051,7 @@ async function loadMonthlyAttendanceReport(){
 
   const nextMonth = getNextMonth(month);
 const endDate = nextMonth;
+const startDate = month + "-01";
 
   const body = document.getElementById("monthlyReportBody");
   const summary = document.getElementById("monthlyReportSummary");
