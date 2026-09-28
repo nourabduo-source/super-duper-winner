@@ -2507,10 +2507,15 @@ async function loginToSystem(){
   message.textContent = "جاري تسجيل الدخول...";
 
   const { data, error } =
-    await supabaseClient.auth.signInWithPassword({
-      email: email,
-      password: password
-    });
+    await Promise.race([
+      supabaseClient.auth.signInWithPassword({
+        email: email,
+        password: password
+      }),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("انتهت مهلة الاتصال بـ Supabase")), 10000)
+      )
+    ]);
 
   if(error){
 
