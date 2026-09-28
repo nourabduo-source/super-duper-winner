@@ -1935,6 +1935,15 @@ select.innerHTML=
 (response.data||[]).map(branch=>
 `<option value="${branch.id}">${esc(branch.name)}</option>`
 ).join("");
+const branchSelector=document.getElementById("branchSelector");
+
+if(branchSelector){
+  branchSelector.innerHTML=
+  '<option value="">كل الفروع</option>'+
+  (response.data||[]).map(branch=>
+  `<option value="${branch.id}">${esc(branch.name)}</option>`
+  ).join("");
+}  
   }
 async function loadDashboard(){
 
@@ -1946,9 +1955,15 @@ const payrollBox=document.getElementById("dashboardPayroll");
 
 if(!employeesBox)return;
 
-const employeesResponse=await supabaseClient
+let employeesQuery=supabaseClient
 .from("employees")
 .select("id,basic_salary");
+
+if(currentBranchId){
+  employeesQuery=employeesQuery.eq("branch_id",currentBranchId);
+}
+
+const employeesResponse=await employeesQuery;
 
 if(employeesResponse.error){
 console.error(employeesResponse.error);
@@ -1968,10 +1983,16 @@ payrollBox.textContent=money(payroll)+" جنيه";
 
 const today=getToday();
 
-const attendanceResponse=await supabaseClient
+let attendanceQuery=supabaseClient
 .from("attendance")
 .select("*")
 .eq("attendance_date",today);
+
+if(currentBranchId){
+  attendanceQuery=attendanceQuery.eq("branch_id",currentBranchId);
+}
+
+const attendanceResponse=await attendanceQuery;;
 
 if(attendanceResponse.error){
 console.error(attendanceResponse.error);
@@ -2135,11 +2156,17 @@ const startDate = month + "-01";
     </tr>
   `;
 
-  const { data: employees, error: employeesError } =
-    await supabaseClient
-      .from("employees")
-      .select("*")
-      .order("employee_number");
+  let employeesQuery=supabaseClient
+  .from("employees")
+  .select("*")
+  .order("employee_number");
+
+if(currentBranchId){
+  employeesQuery=employeesQuery.eq("branch_id",currentBranchId);
+}
+
+const { data: employees, error: employeesError } =
+  await employeesQuery;
 
   if(employeesError){
 
@@ -2155,12 +2182,18 @@ const startDate = month + "-01";
   return;
 }
 
-  const { data: attendance, error: attendanceError } =
-  await supabaseClient
-    .from("attendance")
-    .select("*")
-    .gte("attendance_date", startDate)
-    .lt("attendance_date", endDate);
+  let attendanceQuery=supabaseClient
+  .from("attendance")
+  .select("*")
+  .gte("attendance_date",startDate)
+  .lt("attendance_date",endDate);
+
+if(currentBranchId){
+  attendanceQuery=attendanceQuery.eq("branch_id",currentBranchId);
+}
+
+const { data: attendance, error: attendanceError } =
+  await attendanceQuery;
 body.innerHTML = `<tr><td colspan="7" style="padding:20px;">تم تحميل الحضور: ${attendance ? attendance.length : 0} سجل</td></tr>`;
 
   if(attendanceError){
