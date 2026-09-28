@@ -1466,6 +1466,9 @@ return;
 const ar=await supabaseClient
 .from("attendance")
 .select("*")
+if(currentBranchId){
+  arQuery=arQuery.eq("branch_id",currentBranchId);
+}  
 .gte("attendance_date",month+"-01")
 .lt("attendance_date",getNextMonth(month));
 
