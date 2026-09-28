@@ -2505,8 +2505,40 @@ async function loginToSystem(){
   message.style.color = "#333";
   message.textContent = "جاري تسجيل الدخول...";
 
-  const { data, error } =
-    await Promise.race([
+  let data;
+let error;
+
+try {
+  const result = await Promise.race([
+    supabaseClient.auth.signInWithPassword({
+      email: email,
+      password: password
+    }),
+
+    new Promise((_, reject) =>
+      setTimeout(
+        () => reject(new Error("TIMEOUT")),
+        10000
+      )
+    )
+  ]);
+
+  data = result.data;
+  error = result.error;
+
+} catch (err) {
+
+  console.error("LOGIN ERROR:", err);
+
+  message.style.color = "#d00";
+
+  message.textContent =
+    err.message === "TIMEOUT"
+      ? "الاتصال بـ Supabase لم يستجب خلال 10 ثواني."
+      : "حدث خطأ أثناء تسجيل الدخول.";
+
+  return;
+}
       supabaseClient.auth.signInWithPassword({
         email: email,
         password: password
