@@ -1463,12 +1463,15 @@ body.innerHTML=
 return;
 }
 
-const ar=await supabaseClient
+let arQuery=supabaseClient
 .from("attendance")
-.select("*")
+.select("*");
+
 if(currentBranchId){
   arQuery=arQuery.eq("branch_id",currentBranchId);
-}  
+}
+
+const ar=await arQuery;  
 .gte("attendance_date",month+"-01")
 .lt("attendance_date",getNextMonth(month));
 
