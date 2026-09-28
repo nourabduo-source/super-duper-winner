@@ -552,8 +552,6 @@ const supabaseClient=supabase.createClient(
   SUPABASE_KEY
 );
 
-console.log("Supabase:", supabaseClient);
-
 let employeesCache=[];
 let currentBranchId=null;  
 let salaryModalData=null;
@@ -1827,7 +1825,6 @@ font-weight:bold;
 background:#ecfdf5;
 }
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -2508,55 +2505,19 @@ async function loginToSystem(){
   message.style.color = "#333";
   message.textContent = "جاري تسجيل الدخول...";
 
-    let data;
-  let error;
-
-  try {
-
-    const result = await Promise.race([
-
+  const { data, error } =
+    await Promise.race([
       supabaseClient.auth.signInWithPassword({
         email: email,
         password: password
       }),
-
       new Promise((_, reject) =>
-        setTimeout(
-          () => reject(new Error("TIMEOUT")),
-          10000
-        )
+        setTimeout(() => reject(new Error("انتهت مهلة الاتصال بـ Supabase")), 10000)
       )
-
     ]);
-
-    data = result.data;
-    error = result.error;
-
-  } catch (err) {
-
-    console.error("LOGIN ERROR:", err);
-
-    message.style.color = "#d00";
-
-    message.textContent =
-      err.message === "TIMEOUT"
-        ? "الاتصال بـ Supabase لم يستجب خلال 10 ثواني."
-        : "حدث خطأ أثناء الاتصال بـ Supabase.";
-
-    return;
-  }
 
   if(error){
 
-    message.style.color = "#d00";
-
-    message.textContent =
-      "بيانات الدخول غير صحيحة.";
-
-    console.error(error);
-
-    return;
-  }
     message.style.color = "#d00";
     message.textContent =
       "بيانات الدخول غير صحيحة.";
@@ -2622,11 +2583,5 @@ document.addEventListener(
 );
 
 </script>
-<script>
-setTimeout(function(){
-  alert("الاتصال بصفحة النظام يعمل");
-}, 2000);
-</script> 
 </body>
-
 </html>
