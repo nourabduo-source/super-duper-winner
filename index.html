@@ -1480,9 +1480,9 @@ if(currentBranchId){
   arQuery=arQuery.eq("branch_id",currentBranchId);
 }
 
-const ar=await arQuery;  
-.gte("attendance_date",month+"-01")
-.lt("attendance_date",getNextMonth(month));
+const ar = await arQuery
+  .gte("attendance_date", month + "-01")
+  .lt("attendance_date", getNextMonth(month));
 
 if(ar.error){
 body.innerHTML=
