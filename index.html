@@ -2539,26 +2539,17 @@ document.getElementById("loginScreen").style.display = "none";
 
 }
 
-}
-  
-      "بيانات الدخول غير صحيحة.";
-
-    console.error(error);
-
-    return;
-  }
-
-  document.getElementById("loginScreen").style.display = "none";
-
-  message.textContent = "";
-}
-
-
 async function checkLogin(){
 
-  document.getElementById("loginScreen").style.display = "flex";
+  const {
+    data: { session }
+  } = await supabaseClient.auth.getSession();
 
-}
+  if(session){
+    document.getElementById("loginScreen").style.display = "none";
+  }else{
+    document.getElementById("loginScreen").style.display = "flex";
+  }
 
 }
 
