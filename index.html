@@ -2507,48 +2507,55 @@ async function loginToSystem(){
   message.style.color = "#333";
   message.textContent = "جاري تسجيل الدخول...";
 
-  let data;
-let error;
+    let data;
+  let error;
 
-try {
+  try {
 
-  const result = await Promise.race([
+    const result = await Promise.race([
 
-    supabaseClient.auth.signInWithPassword({
-      email: email,
-      password: password
-    }),
+      supabaseClient.auth.signInWithPassword({
+        email: email,
+        password: password
+      }),
 
-    new Promise((_, reject) =>
-      setTimeout(
-        () => reject(new Error("TIMEOUT")),
-        10000
+      new Promise((_, reject) =>
+        setTimeout(
+          () => reject(new Error("TIMEOUT")),
+          10000
+        )
       )
-    )
 
-  ]);
-
-  data = result.data;
-  error = result.error;
-
-} catch (err) {
-
-  console.error("LOGIN ERROR:", err);
-
-  message.style.color = "#d00";
-
-  message.textContent =
-    err.message === "TIMEOUT"
-      ? "الاتصال بـ Supabase لم يستجب خلال 10 ثواني."
-      : "حدث خطأ أثناء الاتصال بـ Supabase.";
-
-  return;
- }
-      )
     ]);
+
+    data = result.data;
+    error = result.error;
+
+  } catch (err) {
+
+    console.error("LOGIN ERROR:", err);
+
+    message.style.color = "#d00";
+
+    message.textContent =
+      err.message === "TIMEOUT"
+        ? "الاتصال بـ Supabase لم يستجب خلال 10 ثواني."
+        : "حدث خطأ أثناء الاتصال بـ Supabase.";
+
+    return;
+  }
 
   if(error){
 
+    message.style.color = "#d00";
+
+    message.textContent =
+      "بيانات الدخول غير صحيحة.";
+
+    console.error(error);
+
+    return;
+  }
     message.style.color = "#d00";
     message.textContent =
       "بيانات الدخول غير صحيحة.";
