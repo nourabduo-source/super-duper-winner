@@ -545,13 +545,14 @@ oninput="filterEmployees()">
 <script>
 
 const SUPABASE_URL="https://vbfxwvubdtypioshrcgf.supabase.co";
-const SUPABASE_KEY="sb_publishable_BS9niZgVNaN0c18_vVoE1w_BCqYkKyo";
-console.log("Supabase:", supabaseClient); 
+const SUPABASE_KEY="موجود";
 
 const supabaseClient=supabase.createClient(
   SUPABASE_URL,
   SUPABASE_KEY
 );
+
+console.log("Supabase:", supabaseClient);
 
 let employeesCache=[];
 let currentBranchId=null;  
