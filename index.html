@@ -2555,22 +2555,13 @@ async function checkLogin(){
 
 
 async function checkLogin(){
+async function checkLogin(){
 
-  const {
-    data: { session }
-  } = await supabaseClient.auth.getSession();
+  await supabaseClient.auth.signOut();
 
-  if(session){
+  document.getElementById("loginScreen").style.display = "flex";
 
-    document.getElementById("loginScreen").style.display = "none";
-
-  }else{
-
-    document.getElementById("loginScreen").style.display = "flex";
-
-  }
 }
-
 
 supabaseClient.auth.onAuthStateChange(
   function(event, session){
