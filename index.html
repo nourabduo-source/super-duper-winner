@@ -2523,23 +2523,23 @@ async function loginToSystem(){
 
     message.style.color = "#080";
     message.textContent =
-      "تم تسجيل الدخول بنجاح.";
+      message.textContent =
+  "تم تسجيل الدخول بنجاح.";
 
-    document.getElementById("loginScreen").style.display = "none";
+document.getElementById("loginScreen").style.display = "none";
 
-  } catch(error) {
+} catch(error) {
 
-    console.error("LOGIN ERROR:", error);
+  console.error("LOGIN ERROR:", error);
 
-    message.style.color = "#d00";
-    message.textContent =
-      "حدث خطأ أثناء الاتصال بـ Supabase: " +
-      error.message;
+  message.style.color = "#d00";
+  message.textContent =
+    "حدث خطأ أثناء الاتصال بـ Supabase: " +
+    error.message;
 
- 
+}
 
-} 
-async function checkLogin(){
+}
   
       "بيانات الدخول غير صحيحة.";
 
