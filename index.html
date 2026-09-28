@@ -1222,11 +1222,17 @@ const body=document.getElementById("attendanceBody");
 
 body.innerHTML="<tr><td colspan='9'>جاري التحميل...</td></tr>";
 
-const r=await supabaseClient
+let rQuery=supabaseClient
 .from("attendance")
 .select(`*,employees(name,employee_number)`)
 .order("attendance_date",{ascending:false})
 .order("id",{ascending:false});
+
+if(currentBranchId){
+  rQuery=rQuery.eq("branch_id",currentBranchId);
+}
+
+const r=await rQuery;
 
 if(r.error){
 body.innerHTML=
@@ -1440,10 +1446,16 @@ document.getElementById("salaryMonth").value=month;
 
 body.innerHTML="<tr><td colspan='15'>جاري حساب الرواتب...</td></tr>";
 
-const er=await supabaseClient
+let erQuery=supabaseClient
 .from("employees")
 .select("*")
 .order("id",{ascending:true});
+
+if(currentBranchId){
+  erQuery=erQuery.eq("branch_id",currentBranchId);
+}
+
+const er=await erQuery;
 
 if(er.error){
 body.innerHTML=
@@ -2010,6 +2022,12 @@ loadEmployeeBranches();
 loadDashboard();
 
 });
+function selectBranch(branchId){
+  currentBranchId = branchId ? Number(branchId) : null;
+  loadEmployees();
+  loadAttendance();
+  loadSalaries();
+}  
 </script>
 
 <!-- تقرير الحضور الشهري -->
