@@ -62,6 +62,12 @@ th,td{font-size:13px}.tabs button{flex:1}.big-action{width:100%}
 </header>
 
 <div class="container">
+<div style="margin-bottom:20px;">
+  <label>اختر الفندق / الفرع</label>
+  <select id="branchSelector" onchange="selectBranch(this.value)">
+    <option value="">كل الفروع</option>
+  </select>
+</div>  
 
 <div class="tabs">
 <button class="active" onclick="showTab('home',this)">الرئيسية</button>
