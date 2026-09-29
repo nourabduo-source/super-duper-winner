@@ -1269,7 +1269,33 @@ status.textContent="تم حفظ حالة الحضور. الخصم: "+money(deduc
 
 await loadAttendance();
 }
+async function loadSystemSettings(){
 
+const nameInput=document.getElementById("settingCompanyName");
+const countrySelect=document.getElementById("settingCountry");
+const currencySelect=document.getElementById("settingCurrency");
+
+if(!nameInput || !countrySelect || !currencySelect)return;
+
+const {data,error}=await supabaseClient
+.from("organizations")
+.select("name,country,currency")
+.eq("id",1)
+.single();
+
+if(error){
+document.getElementById("settingsStatus").textContent=
+"تعذر تحميل الإعدادات: "+error.message;
+return;
+}
+
+nameInput.value=data.name || "";
+countrySelect.value=data.country || "EG";
+currencySelect.value=data.currency || "EGP";
+
+document.getElementById("settingsStatus").textContent=
+"تم تحميل إعدادات المنشأة.";
+ }
 async function loadAttendance(){
 
 const body=document.getElementById("attendanceBody");
