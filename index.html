@@ -621,10 +621,12 @@ oninput="filterEmployees()">
 const SUPABASE_URL="https://vbfxwvubdtypioshrcgf.supabase.co";
 const SUPABASE_KEY="sb_publishable_BS9niZgVNaN0c18_vVoE1w_BCqYkKyo";
 
-const supabaseClient = window.supabase.createClient(
+window.supabaseClient = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_KEY
 );
+
+var supabaseClient = window.supabaseClient;
 let employeesCache=[];
 let currentBranchId=null;  
 let salaryModalData=null;
