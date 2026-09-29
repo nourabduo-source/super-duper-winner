@@ -77,7 +77,8 @@ th,td{font-size:13px}.tabs button{flex:1}.big-action{width:100%}
 <button onclick="showTab('employees',this)">الموظفون</button>
 <button onclick="showTab('attendance',this)">الحضور والانصراف</button>
 <button onclick="showTab('salaries',this)">الرواتب</button>
- <button onclick="showTab('settings',this)">الإعدادات</button>
+<button onclick="showTab('branches',this)">الفروع</button>
+<button onclick="showTab('settings',this)">الإعدادات</button>
 </div>
 
 <!-- الرئيسية -->
@@ -123,6 +124,32 @@ th,td{font-size:13px}.tabs button{flex:1}.big-action{width:100%}
 </div>
 </section>
 <!-- الإعدادات -->
+ <section id="branches" class="section">
+
+  <div class="card">
+    <h2>الفروع</h2>
+
+    <div class="grid">
+
+      <div>
+        <label>اسم الفرع</label>
+        <input id="branchName" type="text" placeholder="اسم الفرع">
+      </div>
+
+      <div>
+        <label>المدينة</label>
+        <input id="branchCity" type="text" placeholder="المدينة">
+      </div>
+
+    </div>
+
+    <button onclick="addBranch()">إضافة الفرع</button>
+
+    <div id="branchesList" style="margin-top:20px;"></div>
+
+  </div>
+
+ </section>
 <section id="settings" class="section">
 
 <div class="card">
