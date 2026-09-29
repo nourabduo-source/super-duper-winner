@@ -2691,7 +2691,9 @@ async function loginToSystem(){
   message.textContent = "جاري تسجيل الدخول...";
  
   try {
-
+   
+alert(window.SUPABASE_URL);
+   
     const client = window.supabase.createClient(
   window.SUPABASE_URL,
   window.SUPABASE_KEY
