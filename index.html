@@ -2693,8 +2693,13 @@ async function loginToSystem(){
 
   try {
 
-   const result =
-  await window.supabaseClient.auth.signInWithPassword({
+   const client = window.supabase.createClient(
+  "https://vbfxwvubdtypioshrcgf.supabase.co",
+  "sb_publishable_BS9niZgVNaN0c18_vVoE1w_BCqYkKyo"
+);
+
+const result =
+  await client.auth.signInWithPassword({
     email: email,
     password: password
   });
