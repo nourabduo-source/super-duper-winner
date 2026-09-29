@@ -771,17 +771,7 @@ async function addBranch(){
 
   await loadBranches();
  }
-  list.innerHTML = data.map(branch => `
-    <div style="padding:10px;border-bottom:1px solid #ddd;">
-      ${branch.name}
-    </div>
-  `).join("");
-
-}
-
-
-async function addBranch(){
-
+  
   const name = document.getElementById("branchName").value.trim();
 
   if(!name){
