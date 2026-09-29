@@ -1715,6 +1715,7 @@ notes:document.getElementById("salaryNotes").value.trim()
 status.textContent="جاري حفظ الراتب...";
 
 const existing=await getSavedSalary(employeeId,month);
+console.log("SALARY DATA:", data); 
 
 if(existing.error){
 status.textContent="خطأ: "+existing.error.message;
