@@ -711,12 +711,102 @@ loadAttendance();
 if(id==="salaries"){
 loadSalaries();
 }
-
+if(id==="branches"){
+  loadBranches();
+ }
 if(id==="settings"){
 loadSystemSettings();
 }
 }
+async function loadBranches(){
 
+  const { data, error } = await supabase
+    .from("branches")
+    .select("id,name,active")
+    .eq("organization_id",1)
+    .order("name");
+
+  if(error){
+    document.getElementById("branchesList").textContent =
+      "تعذر تحميل الفروع: " + error.message;
+    return;
+  }
+
+  const list = document.getElementById("branchesList");
+
+  if(!data || data.length === 0){
+    list.innerHTML = "<p>لا توجد فروع مسجلة.</p>";
+    return;
+  }
+  list.innerHTML = data.map(branch => `
+    <div style="padding:10px;border-bottom:1px solid #ddd;">
+      ${branch.name}
+    </div>
+  `).join("");
+}
+
+async function addBranch(){
+
+  const name = document.getElementById("branchName").value.trim();
+
+  if(!name){
+    alert("اكتب اسم الفرع أولاً.");
+    return;
+  }
+
+  const { error } = await supabase
+    .from("branches")
+    .insert({
+      organization_id: 1,
+      name: name,
+      active: true
+    });
+
+  if(error){
+    alert("تعذر إضافة الفرع: " + error.message);
+    return;
+  }
+
+  document.getElementById("branchName").value = "";
+
+  await loadBranches();
+ }
+  list.innerHTML = data.map(branch => `
+    <div style="padding:10px;border-bottom:1px solid #ddd;">
+      ${branch.name}
+    </div>
+  `).join("");
+
+}
+
+
+async function addBranch(){
+
+  const name = document.getElementById("branchName").value.trim();
+
+  if(!name){
+    alert("اكتب اسم الفرع أولاً.");
+    return;
+  }
+
+  const { error } = await supabase
+    .from("branches")
+    .insert({
+      organization_id: 1,
+      name: name,
+      active: true
+    });
+
+  if(error){
+    alert("تعذر إضافة الفرع: " + error.message);
+    return;
+  }
+
+  document.getElementById("branchName").value = "";
+
+  await loadBranches();
+
+ }
 function goToAttendance(type){
 
 const btn=document.querySelector('.tabs button[onclick*="attendance"]');
