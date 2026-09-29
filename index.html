@@ -2692,12 +2692,10 @@ async function loginToSystem(){
 
   try {
 
-   alert(typeof window.SUPABASE_KEY);
-   
-    const client = window.supabase.createClient(
-      "https://vbfxwvubdtypioshrcgf.supabase.co",
-      window.SUPABASE_KEY
-    );
+   const client = window.supabase.createClient(
+  "https://vbfxwvubdtypioshrcgf.supabase.co",
+  "sb_publishable_BS9niZgVNaN0c18_vVoE1w_BCqYkKyo"
+);
 
     const result =
       await client.auth.signInWithPassword({
