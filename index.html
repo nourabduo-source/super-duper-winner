@@ -77,6 +77,7 @@ th,td{font-size:13px}.tabs button{flex:1}.big-action{width:100%}
 <button onclick="showTab('employees',this)">الموظفون</button>
 <button onclick="showTab('attendance',this)">الحضور والانصراف</button>
 <button onclick="showTab('salaries',this)">الرواتب</button>
+ <button onclick="showTab('settings',this)">الإعدادات</button>
 </div>
 
 <!-- الرئيسية -->
@@ -121,7 +122,50 @@ th,td{font-size:13px}.tabs button{flex:1}.big-action{width:100%}
 <div id="homeStatus" class="status">جاهز.</div>
 </div>
 </section>
+<!-- الإعدادات -->
+<section id="settings" class="section">
 
+<div class="card">
+<h2>إعدادات النظام</h2>
+
+<div class="grid">
+
+<div>
+<label>اسم الشركة / المنشأة</label>
+<input id="settingCompanyName" type="text" placeholder="اسم الشركة">
+</div>
+
+<div>
+<label>الدولة</label>
+<select id="settingCountry">
+<option value="EG">مصر</option>
+<option value="SA">السعودية</option>
+<option value="AE">الإمارات</option>
+<option value="QA">قطر</option>
+</select>
+</div>
+
+<div>
+<label>العملة</label>
+<select id="settingCurrency">
+<option value="EGP">الجنيه المصري EGP</option>
+<option value="SAR">الريال السعودي SAR</option>
+<option value="AED">الدرهم الإماراتي AED</option>
+<option value="QAR">الريال القطري QAR</option>
+</select>
+</div>
+
+</div>
+
+<div class="actions" style="margin-top:15px">
+<button class="primary" onclick="saveSystemSettings()">حفظ الإعدادات</button>
+</div>
+
+<div id="settingsStatus" class="status"></div>
+
+</div>
+
+</section>
 <!-- الموظفون -->
 <section id="employees" class="section">
 
