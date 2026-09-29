@@ -2692,7 +2692,7 @@ async function loginToSystem(){
  
   try {
    
-alert(window.SUPABASE_URL);
+alert(typeof window.supabase);
    
     const client = window.supabase.createClient(
   window.SUPABASE_URL,
