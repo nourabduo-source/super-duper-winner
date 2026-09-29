@@ -2689,16 +2689,14 @@ async function loginToSystem(){
 
   message.style.color = "#333";
   message.textContent = "جاري تسجيل الدخول...";
- 
+
   try {
-   
 
-
-const result =
-  await client.auth.signInWithPassword({
-    email: email,
-    password: password
-  });
+    const result =
+      await window.supabaseClient.auth.signInWithPassword({
+        email: email,
+        password: password
+      });
 
     console.log("LOGIN RESULT:", result);
 
@@ -2712,22 +2710,21 @@ const result =
     }
 
     message.style.color = "#080";
-message.textContent =
-  "تم تسجيل الدخول بنجاح.";
+    message.textContent =
+      "تم تسجيل الدخول بنجاح.";
 
-document.getElementById("loginScreen").style.display = "none";
+    document.getElementById("loginScreen").style.display = "none";
 
-} catch(error) {
+  } catch(error) {
 
-  console.error("LOGIN ERROR:", error);
+    console.error("LOGIN ERROR:", error);
 
-  message.style.color = "#d00";
-  message.style.color = "#d00";
-message.textContent =
-  "حدث خطأ أثناء الاتصال بـ Supabase: " +
-  error.message;
+    message.style.color = "#d00";
+    message.textContent =
+      "حدث خطأ أثناء الاتصال بـ Supabase: " +
+      error.message;
 
-}
+  }
 
 }
 
