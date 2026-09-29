@@ -629,7 +629,7 @@ window.supabaseClient = window.supabase.createClient(
 var supabaseClient = window.supabaseClient;
  
 console.log("SUPABASE CLIENT TEST:", window.supabaseClient);
-alert(typeof window.supabase); 
+
  
 let employeesCache=[];
 let currentBranchId=null;  
@@ -2692,12 +2692,7 @@ async function loginToSystem(){
  
   try {
    
-alert(typeof window.supabase);
-   
-    const client = window.supabase.createClient(
-  window.SUPABASE_URL,
-  window.SUPABASE_KEY
-);
+
 
 const result =
   await client.auth.signInWithPassword({
