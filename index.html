@@ -617,25 +617,81 @@ oninput="filterEmployees()">
 
 
 <script>
-alert(typeof window.supabase); 
+let supabaseClient = null;
+let employeesCache = [];
+let currentBranchId = null;
+let salaryModalData = null;
 
-alert("SCRIPT 2 START");
+const SUPABASE_URL = "https://vbfxwvubdtypioshrcgf.supabase.co";
+const SUPABASE_KEY = window.SUPABASE_KEY || "sb_publishable_BS9niZgVNaN0c18_vVoE1w_BCqYkKyo";
 
-window.SUPABASE_URL="https://vbfxwvubdtypioshrcgf.supabase.co";
-window.SUPABASE_KEY="sb_publishable_BS9niZgVNaN0c18_vVoE1w_BCqYkKyo";
+let supabaseReadyPromise = null;
 
-window.supabaseClient = window.supabase.createClient(
-  window.SUPABASE_URL,
-  window.SUPABASE_KEY
-);
+function ensureSupabase(){
 
-var supabaseClient = window.supabaseClient;
-console.log("FINAL SUPABASE CLIENT:", supabaseClient);
+  if(supabaseClient && supabaseClient.auth){
+    return Promise.resolve(supabaseClient);
+  }
 
- 
-let employeesCache=[];
-let currentBranchId=null;  
-let salaryModalData=null;
+  if(window.supabase && window.supabase.createClient){
+
+    supabaseClient = window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY
+    );
+
+    window.supabaseClient = supabaseClient;
+
+    return Promise.resolve(supabaseClient);
+  }
+
+  if(supabaseReadyPromise){
+    return supabaseReadyPromise;
+  }
+
+  supabaseReadyPromise = new Promise(function(resolve,reject){
+
+    const script = document.createElement("script");
+
+    script.src =
+      "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+
+    script.onload = function(){
+
+      try{
+
+        supabaseClient =
+          window.supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_KEY
+          );
+
+        window.supabaseClient = supabaseClient;
+
+        resolve(supabaseClient);
+
+      }catch(error){
+
+        reject(error);
+
+      }
+
+    };
+
+    script.onerror = function(){
+
+      reject(
+        new Error("تعذر تحميل مكتبة Supabase")
+      );
+
+    };
+
+    document.head.appendChild(script);
+
+  });
+
+  return supabaseReadyPromise;
+}
 
 /* =========================
    أدوات عامة
