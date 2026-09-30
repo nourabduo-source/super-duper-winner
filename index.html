@@ -756,11 +756,10 @@ absent:"غياب"
 ========================= */
 
 function showTab(id,btn){
-alert("SHOWTAB WORKING");
+
 document.querySelectorAll(".section").forEach(x=>x.classList.remove("active"));
 
 const target=document.getElementById(id);
-alert("TARGET = " + (target ? "موجود" : "غير موجود")); 
 
 if(!target){
   alert("القسم غير موجود: " + id);
@@ -768,7 +767,7 @@ if(!target){
 }
 
 target.classList.add("active");
-alert("BRANCHES OPEN");
+
 document.querySelectorAll(".tabs button").forEach(x=>x.classList.remove("active"));
 if(btn)btn.classList.add("active");
 
