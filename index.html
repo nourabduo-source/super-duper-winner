@@ -760,7 +760,13 @@ alert("SHOWTAB WORKING");
 document.querySelectorAll(".section").forEach(x=>x.classList.remove("active"));
 
 const target=document.getElementById(id);
-if(target)target.classList.add("active");
+
+if(!target){
+  alert("القسم غير موجود: " + id);
+  return;
+}
+
+target.classList.add("active");
 
 document.querySelectorAll(".tabs button").forEach(x=>x.classList.remove("active"));
 if(btn)btn.classList.add("active");
