@@ -787,7 +787,7 @@ loadSystemSettings();
 }
 async function loadBranches(){
 
-  const { data, error } = await supabase
+  const { data, error } = await supabaseClient
     .from("branches")
     .select("id,name,active")
     .eq("organization_id",1)
