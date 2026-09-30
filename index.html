@@ -785,11 +785,16 @@ loadAttendance();
 }
 
 if(id==="salaries"){
-loadSalaries();
+  loadSalaries();
 }
+
 if(id==="branches"){
-  loadBranches();
- }
+  document.getElementById("branches").innerHTML =
+    '<div class="card"><h2>اختبار الفروع</h2><p>قسم الفروع يعمل.</p></div>';
+
+  document.getElementById("branches").style.display = "block";
+}
+
 if(id==="settings"){
 loadSystemSettings();
 }
