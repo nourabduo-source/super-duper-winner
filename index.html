@@ -621,12 +621,14 @@ oninput="filterEmployees()">
 window.SUPABASE_URL="https://vbfxwvubdtypioshrcgf.supabase.co";
 window.SUPABASE_KEY="sb_publishable_BS9niZgVNaN0c18_vVoE1w_BCqYkKyo";
 
+alert("BEFORE CREATE");
+
 window.supabaseClient = window.supabase.createClient(
   window.SUPABASE_URL,
   window.SUPABASE_KEY
-
 );
-alert("SUPABASE CLIENT CREATED"); 
+
+alert("AFTER CREATE");
 
 var supabaseClient = window.supabaseClient;
 console.log("FINAL SUPABASE CLIENT:", supabaseClient); 
