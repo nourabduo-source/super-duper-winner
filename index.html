@@ -836,31 +836,7 @@ async function addBranch(){
   await loadBranches();
  }
   
-  const name = document.getElementById("branchName").value.trim();
-
-  if(!name){
-    alert("اكتب اسم الفرع أولاً.");
-    return;
-  }
-
-  const { error } = await supabase
-    .from("branches")
-    .insert({
-      organization_id: 1,
-      name: name,
-      active: true
-    });
-
-  if(error){
-    alert("تعذر إضافة الفرع: " + error.message);
-    return;
-  }
-
-  document.getElementById("branchName").value = "";
-
-  await loadBranches();
-
- }
+  
 function goToAttendance(type){
 
 const btn=document.querySelector('.tabs button[onclick*="attendance"]');
