@@ -2691,11 +2691,6 @@ async function loginToSystem(){
 
   try {
 
-   window.supabaseClient = window.supabase.createClient(
-  "https://vbfxwvubdtypioshrcgf.supabase.co",
-  "sb_publishable_BS9niZgVNaN0c18_vVoE1w_BCqYkKyo"
-);
-
 const result =
   await window.supabaseClient.auth.signInWithPassword({
     email: email,
