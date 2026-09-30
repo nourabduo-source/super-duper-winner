@@ -626,6 +626,12 @@ window.supabaseClient = window.supabase.createClient(
   window.SUPABASE_KEY
 );
 
+if (!window.supabaseClient) {
+  alert("SUPABASE CLIENT NOT CREATED");
+} else {
+  alert("SUPABASE CLIENT CREATED");
+}
+
 var supabaseClient = window.supabaseClient;
 console.log("FINAL SUPABASE CLIENT:", supabaseClient); 
 
