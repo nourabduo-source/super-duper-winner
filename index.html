@@ -2732,14 +2732,15 @@ async function checkLogin(){
 
   const {
     data: { session }
-  } = await supabaseClient.auth.getSession();
+  } = await window.supabaseClient.auth.getSession();
 
   if(session){
     document.getElementById("loginScreen").style.display = "none";
   }else{
     document.getElementById("loginScreen").style.display = "flex";
+  
   }
-
+ 
 }
 
 supabaseClient.auth.onAuthStateChange(
