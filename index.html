@@ -1833,7 +1833,323 @@ ${x.saved.id?`
 
 `).join("");
 }
+async function printEmployeeMonthlyReport(employeeId, month){
 
+  const employee = (await supabaseClient
+    .from("employees")
+    .select("*")
+    .eq("id", employeeId)
+    .single()).data;
+
+  if(!employee){
+    alert("تعذر العثور على الموظف.");
+    return;
+  }
+
+  let query = supabaseClient
+    .from("attendance")
+    .select("*")
+    .eq("employee_id", employeeId)
+    .gte("attendance_date", month + "-01")
+    .lt("attendance_date", getNextMonth(month))
+    .order("attendance_date",{ascending:true});
+
+  if(currentBranchId){
+    query = query.eq("branch_id", currentBranchId);
+  }
+
+  const result = await query;
+
+  if(result.error){
+    alert("تعذر تحميل الحضور: " + result.error.message);
+    return;
+  }
+
+  const attendance = result.data || [];
+
+  const calculated = calculateSalaryData(
+    employee,
+    attendance,
+    month
+  );
+
+  const savedResult = await getSavedSalary(employeeId, month);
+
+  const saved = savedResult.data || {
+    allowances:0,
+    advances:0,
+    other_deductions:0,
+    leave_deductions:0,
+    notes:""
+  };
+
+  const allowances = Number(saved.allowances || 0);
+  const advances = Number(saved.advances || 0);
+  const other = Number(saved.other_deductions || 0);
+  const leave = Number(saved.leave_deductions || 0);
+
+  const total =
+    calculated.attendanceAmount +
+    leave +
+    advances +
+    other;
+
+  const net =
+    calculated.basicSalary +
+    allowances -
+    total;
+
+  const attendanceRows = attendance.map(row => {
+
+    const status =
+      row.status === "absent"
+        ? "غياب"
+        : "حاضر";
+
+    return `
+      <tr>
+        <td>${esc(row.attendance_date || "")}</td>
+        <td>${status}</td>
+        <td>${esc(attendanceTypeName(row.attendance_type))}</td>
+        <td>${money(row.deduction_amount || 0)} جنيه</td>
+        <td>${esc(row.check_in || "-")}</td>
+        <td>${esc(row.check_out || "-")}</td>
+      </tr>
+    `;
+  }).join("");
+
+  const html = `
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+
+<title>التقرير الشهري - ${esc(employee.name)}</title>
+
+<style>
+
+body{
+  font-family:Arial,Tahoma;
+  padding:30px;
+  color:#111827;
+}
+
+h1{
+  text-align:center;
+  color:#123b63;
+}
+
+h2{
+  text-align:center;
+}
+
+.info{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin:20px 0;
+}
+
+.box{
+  border:1px solid #ddd;
+  padding:12px;
+  border-radius:8px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th,td{
+  border:1px solid #ddd;
+  padding:10px;
+  text-align:center;
+}
+
+th{
+  background:#eef4fa;
+}
+
+.summary{
+  margin-top:25px;
+}
+
+.net{
+  font-size:20px;
+  font-weight:bold;
+  background:#ecfdf5;
+}
+
+@media print{
+  button{
+    display:none;
+  }
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>التقرير الشهري للموظف</h1>
+
+<h2>${esc(employee.name)}</h2>
+
+<div class="info">
+
+<div class="box">
+<strong>كود الموظف:</strong>
+${esc(employee.employee_number || "")}
+</div>
+
+<div class="box">
+<strong>الشهر:</strong>
+${esc(month)}
+</div>
+
+<div class="box">
+<strong>الوظيفة:</strong>
+${esc(employee.job || "")}
+</div>
+
+<div class="box">
+<strong>الراتب الأساسي:</strong>
+${money(calculated.basicSalary)} جنيه
+</div>
+
+</div>
+
+<h3>تفاصيل الحضور والانصراف</h3>
+
+<table>
+
+<tr>
+<th>التاريخ</th>
+<th>الحالة</th>
+<th>نوع الحضور</th>
+<th>الخصم</th>
+<th>دخول</th>
+<th>خروج</th>
+</tr>
+
+${attendanceRows || `
+<tr>
+<td colspan="6">لا يوجد سجل حضور لهذا الشهر.</td>
+</tr>
+`}
+
+</table>
+
+<div class="summary">
+
+<h3>ملخص الراتب</h3>
+
+<table>
+
+<tr>
+<th>البيان</th>
+<th>القيمة</th>
+</tr>
+
+<tr>
+<td>أيام الحضور</td>
+<td>${calculated.attendanceDays}</td>
+</tr>
+
+<tr>
+<td>أنصاف الأيام</td>
+<td>${calculated.halfDays}</td>
+</tr>
+
+<tr>
+<td>أرباع الأيام</td>
+<td>${calculated.quarterDays}</td>
+</tr>
+
+<tr>
+<td>أيام الغياب</td>
+<td>${calculated.absentDays}</td>
+</tr>
+
+<tr>
+<td>خصم الحضور والغياب</td>
+<td>${money(calculated.attendanceAmount)} جنيه</td>
+</tr>
+
+<tr>
+<td>خصم الإجازات</td>
+<td>${money(leave)} جنيه</td>
+</tr>
+
+<tr>
+<td>البدلات</td>
+<td>${money(allowances)} جنيه</td>
+</tr>
+
+<tr>
+<td>السلف</td>
+<td>${money(advances)} جنيه</td>
+</tr>
+
+<tr>
+<td>خصومات أخرى</td>
+<td>${money(other)} جنيه</td>
+</tr>
+
+<tr>
+<td><strong>إجمالي الخصومات</strong></td>
+<td>
+<strong>${money(total)} جنيه</strong>
+</td>
+</tr>
+
+<tr class="net">
+<td>صافي الراتب</td>
+<td>${money(net)} جنيه</td>
+</tr>
+
+</table>
+
+</div>
+
+${saved.notes ? `
+<p>
+<strong>ملاحظات:</strong>
+${esc(saved.notes)}
+</p>
+` : ""}
+
+<br><br>
+
+<p style="text-align:center">
+توقيع الموظف: ____________________
+</p>
+
+<p style="text-align:center">
+توقيع المسؤول: ____________________
+</p>
+
+</body>
+</html>
+`;
+
+  const win = window.open("","_blank");
+
+  if(!win){
+    alert("المتصفح منع نافذة التقرير. اسمح بالنوافذ المنبثقة.");
+    return;
+  }
+
+  win.document.write(html);
+  win.document.close();
+
+  setTimeout(()=>{
+    win.print();
+  },500);
+
+ }
 /* =========================
    تعديل الراتب
 ========================= */
