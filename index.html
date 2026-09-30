@@ -2692,7 +2692,8 @@ async function loginToSystem(){
   try {
 
 const result =
-  await window.supabaseClient.auth.signInWithPassword({
+  const result =
+  await supabaseClient.auth.signInWithPassword({
     email: email,
     password: password
   });
