@@ -891,6 +891,26 @@ return;
 }
 
 employeesCache=response.data||[];
+const branchSelect=document.getElementById("employeeBranch");
+
+if(branchSelect){
+
+  const branchResult=await supabaseClient
+    .from("branches")
+    .select("id,name")
+    .eq("organization_id",1)
+    .order("name");
+
+  if(!branchResult.error){
+
+    branchSelect.innerHTML=
+      `<option value="">اختر الفرع</option>`+
+      (branchResult.data||[]).map(branch=>
+        `<option value="${branch.id}">${esc(branch.name)}</option>`
+      ).join("");
+
+  }
+ } 
 const jobFilter=document.getElementById("employeeJobFilter");
 
 if(jobFilter){
