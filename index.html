@@ -889,10 +889,16 @@ if(!body)return;
 
 body.innerHTML="<tr><td colspan='7'>جاري التحميل...</td></tr>";
 
-const response=await supabaseClient
-.from("employees")
-.select("*")
-.order("id",{ascending:true});
+let employeeQuery=supabaseClient
+  .from("employees")
+  .select("*")
+  .order("id",{ascending:true});
+
+if(currentBranchId){
+  employeeQuery=employeeQuery.eq("branch_id",currentBranchId);
+}
+
+const response=await employeeQuery;
 
 if(response.error){
 body.innerHTML=
