@@ -809,11 +809,21 @@ async function loadBranches(){
 
   if(error){
     document.getElementById("branchesList").textContent =
+     
       "تعذر تحميل الفروع: " + error.message;
     return;
   }
 
   const list = document.getElementById("branchesList");
+ const selector = document.getElementById("branchSelector");
+
+if(selector){
+  selector.innerHTML =
+    `<option value="">كل الفروع</option>`+
+    (data||[]).map(branch =>
+      `<option value="${branch.id}">${esc(branch.name)}</option>`
+    ).join("");
+ }
 
   if(!data || data.length === 0){
     list.innerHTML = "<p>لا توجد فروع مسجلة.</p>";
@@ -2621,9 +2631,9 @@ document.getElementById(id)
 });
 
 loadEmployees();
+loadBranches();
 loadEmployeeBranches();
 loadDashboard();
-
 });
 function selectBranch(branchId){
   currentBranchId = branchId ? Number(branchId) : null;
