@@ -830,10 +830,20 @@ if(selector){
     return;
   }
   list.innerHTML = data.map(branch => `
-    <div style="padding:10px;border-bottom:1px solid #ddd;">
-      ${branch.name}
+  <div style="padding:10px;border-bottom:1px solid #ddd;display:flex;justify-content:space-between;align-items:center;gap:10px;">
+    <span>${esc(branch.name)}</span>
+
+    <div>
+      <button class="primary" onclick="editBranch(${branch.id}, '${esc(branch.name).replace(/'/g, "\\'")}')">
+        ✏️ تعديل
+      </button>
+
+      <button class="danger" onclick="deleteBranch(${branch.id}, '${esc(branch.name).replace(/'/g, "\\'")}')">
+        🗑️ حذف
+      </button>
     </div>
-  `).join("");
+  </div>
+`).join("");
 }
 
 async function addBranch(){
@@ -862,8 +872,50 @@ async function addBranch(){
 
   await loadBranches();
  }
-  
-  
+ 
+async function editBranch(id, oldName){
+  const newName = prompt("اكتب اسم الفرع الجديد:", oldName);
+
+  if(newName === null) return;
+
+  const name = newName.trim();
+
+  if(!name){
+    alert("اسم الفرع لا يمكن أن يكون فارغًا.");
+    return;
+  }
+
+  const { error } = await supabaseClient
+    .from("branches")
+    .update({ name: name })
+    .eq("id", id);
+
+  if(error){
+    alert("تعذر تعديل الفرع: " + error.message);
+    return;
+  }
+
+  await loadBranches();
+}
+
+async function deleteBranch(id, name){
+  const ok = confirm("هل أنت متأكد من حذف الفرع:\n" + name + " ؟");
+
+  if(!ok) return;
+
+  const { error } = await supabaseClient
+    .from("branches")
+    .delete()
+    .eq("id", id);
+
+  if(error){
+    alert("تعذر حذف الفرع: " + error.message);
+    return;
+  }
+
+  await loadBranches();
+}
+
 function goToAttendance(type){
 
 const btn=document.querySelector('.tabs button[onclick*="attendance"]');
