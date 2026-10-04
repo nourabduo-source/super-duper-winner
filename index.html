@@ -718,6 +718,18 @@ maximumFractionDigits:2
 });
 }
 
+function currencyName(){
+const el=document.getElementById("settingCurrency");
+const currency=el ? el.value : "EGP";
+
+return {
+EGP:"جنيه",
+SAR:"ريال",
+AED:"درهم",
+QAR:"ريال"
+}[currency] || "جنيه";
+ }
+
 function getToday(){
 const d=new Date();
 return d.getFullYear()+"-"+
