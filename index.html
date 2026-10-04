@@ -1023,8 +1023,8 @@ body.innerHTML=employeesCache.map(e=>`
 <td>${esc(e.employee_number)}</td>
 <td>${esc(e.phone)}</td>
 <td>${esc(e.job)}</td>
-<td>${money(e.basic_salary)} جنيه</td>
-<td>${money(e.daily_salary)} جنيه</td>
+<td>${money(e.basic_salary)} ${currencyName()}</td>
+<td>${money(e.daily_salary)} ${currencyName()}</td>
 <td>
 <button class="primary" onclick="editEmployee(${e.id})">تعديل</button>
 <button class="danger" onclick="deleteEmployee(${e.id})">حذف</button>
