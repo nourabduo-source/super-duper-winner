@@ -719,14 +719,14 @@ maximumFractionDigits:2
 
 function currencyName(){
 const el=document.getElementById("settingCurrency");
-const currency=el ? el.value : "EGP";
+const currency=el ? el.value : "SAR";
 
 return {
 EGP:"جنيه",
 SAR:"ريال",
 AED:"درهم",
 QAR:"ريال"
-}[currency] || "جنيه";
+}[currency] || "ريال";
  }
 
 function getToday(){
