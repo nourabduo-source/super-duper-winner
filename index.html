@@ -879,7 +879,7 @@ async function addBranch(){
     return;
   }
 
-  const { error } = await supabase
+  const { error } = await supabaseClient
     .from("branches")
     .insert({
       organization_id: 1,
