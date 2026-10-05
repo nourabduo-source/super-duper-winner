@@ -1940,20 +1940,20 @@ body.innerHTML=rows.map(x=>`
 <tr>
 <td>${esc(month)}</td>
 <td><strong>${esc(x.employee.name)}</strong></td>
-<td>${money(x.calculated.basicSalary)} جنيه</td>
+<td>${money(x.calculated.basicSalary)} ${currencyName()}</td>
 <td>${x.calculated.attendanceDays}</td>
 <td>${x.calculated.halfDays}</td>
 <td>${x.calculated.quarterDays}</td>
 <td>${x.calculated.absentDays}</td>
-<td>${money(x.calculated.attendanceAmount)} جنيه</td>
-<td>${money(x.leave)} جنيه</td>
-<td>${money(x.allowances)} جنيه</td>
-<td>${money(x.advances)} جنيه</td>
-<td>${money(x.other)} جنيه</td>
-<td>${money(x.total)} جنيه</td>
+<td>${money(x.calculated.attendanceAmount)} ${currencyName()}</td>
+<td>${money(x.leave)} ${currencyName()}</td>
+<td>${money(x.allowances)} ${currencyName()}</td>
+<td>${money(x.advances)} ${currencyName()}</td>
+<td>${money(x.other)} ${currencyName()}</td>
+<td>${money(x.total)} ${currencyName()}</td>
 <td>
 <strong style="color:#15803d">
-${money(x.net)} جنيه
+${money(x.net)} ${currencyName()}
 </strong>
 </td>
 <td>
