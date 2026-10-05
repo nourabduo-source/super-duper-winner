@@ -57,6 +57,19 @@ th,td{font-size:13px}.tabs button{flex:1}.big-action{width:100%}
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#0f766e">
+
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./service-worker.js")
+      .then(() => console.log("Service Worker registered"))
+      .catch(error => console.error("Service Worker error:", error));
+  });
+}
+</script>
+
 </head>
 
 <body>
