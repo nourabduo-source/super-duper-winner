@@ -1176,10 +1176,12 @@ async function generateEmployeeNumber(){
 
   const startNumber = branchStarts[branch.name];
 
-  if(!startNumber){
-    numberInput.value = "";
-    return;
-  }
+alert("اسم الفرع في قاعدة البيانات: [" + branch.name + "]");
+
+if(!startNumber){
+  numberInput.value = "";
+  return;
+}
 
   const { data: employees, error } = await supabaseClient
     .from("employees")
