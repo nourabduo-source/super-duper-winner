@@ -2726,7 +2726,7 @@ leaveBox.textContent=leave;
    التشغيل
 ========================= */
 
-document.addEventListener("DOMContentLoaded",function(){
+document.addEventListener("DOMContentLoaded",async function(){
 
 document.getElementById("attendanceDate").value=getToday();
 document.getElementById("salaryMonth").value=getCurrentMonth();
@@ -2747,10 +2747,13 @@ document.getElementById(id)
 .addEventListener("input",calculateSalaryModalTotal);
 });
 
+await loadSystemSettings();
+
 loadEmployees();
 loadBranches();
 loadEmployeeBranches();
 loadDashboard();
+
 });
 function selectBranch(branchId){
   currentBranchId = branchId ? Number(branchId) : null;
