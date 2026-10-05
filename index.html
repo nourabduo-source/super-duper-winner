@@ -1647,7 +1647,7 @@ body.innerHTML=rows.map(row=>`
 <td>${esc(row.employees?.employee_number||"")}</td>
 <td>${row.status==="absent"?"غياب":"حاضر"}</td>
 <td>${esc(attendanceTypeName(row.attendance_type))}</td>
-<td>${money(row.deduction_amount)} جنيه</td>
+<td>${money(row.deduction_amount)} ${currencyName()}</td>
 <td>${esc(row.check_in||"-")}</td>
 <td>${esc(row.check_out||"-")}</td>
 <td>
