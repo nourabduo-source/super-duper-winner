@@ -409,131 +409,11 @@ oninput="filterEmployees()">
 </div>
 
 <div>
- <label>الفرع</label>
-<label>الفرع</label>
-<select id="employeeBranch">
-  <option value="">اختر الفرع</option>
-</select>
-
-<script>
-async function generateEmployeeNumber(){
-
-  const branchSelect = document.getElementById("employeeBranch");
-  const numberInput = document.getElementById("employeeNumber");
-  const employeeId = document.getElementById("employeeId")?.value;
-
-  if(!branchSelect || !numberInput) return;
-
-  const branchId = branchSelect.value;
-
-  if(!branchId){
-    numberInput.value = "";
-    return;
-  }
-
-  if(employeeId){
-    return;
-  }
-
-  const selectedOption =
-    branchSelect.options[branchSelect.selectedIndex];
-
-  const branchName =
-    (selectedOption?.textContent || "").trim();
-
-  const branchStarts = {
-    "بيست داي المحمدية": 601,
-    "بيست داي حراء": 101,
-    "لحظات البلد": 201,
-    "لحظات الزهراء": 301,
-    "لحظات المروه": 501,
-    "لحظات حراء 1": 401
-  };
-
-  const startNumber = branchStarts[branchName];
-
-<div>
   <label>الفرع</label>
   <select id="employeeBranch">
     <option value="">اختر الفرع</option>
   </select>
 </div>
-
-<script>
-async function generateEmployeeNumber(){
-
-  const branchSelect = document.getElementById("employeeBranch");
-  const numberInput = document.getElementById("employeeNumber");
-  const employeeId = document.getElementById("employeeId")?.value;
-
-  if(!branchSelect || !numberInput) return;
-
-  const branchId = branchSelect.value;
-
-  if(!branchId){
-    numberInput.value = "";
-    return;
-  }
-
-  if(employeeId){
-    return;
-  }
-
-  const selectedOption =
-    branchSelect.options[branchSelect.selectedIndex];
-
-  const branchName =
-    (selectedOption?.textContent || "").trim();
-
-  const branchStarts = {
-    "بيست داي المحمدية": 601,
-    "بيست داي حراء": 101,
-    "لحظات البلد": 201,
-    "لحظات الزهراء": 301,
-    "لحظات المروه": 501,
-    "لحظات حراء 1": 401
-  };
-
-  const startNumber = branchStarts[branchName];
-
-  if(!startNumber){
-    numberInput.value = "";
-    return;
-  }
-
-  const { data, error } = await supabaseClient
-    .from("employees")
-    .select("employee_number")
-    .eq("branch_id", Number(branchId));
-
-  if(error){
-    console.error("خطأ في حساب كود الموظف:", error);
-    return;
-  }
-
-  let maxNumber = startNumber - 1;
-
-  (data || []).forEach(employee => {
-
-    const employeeNumber =
-      Number(employee.employee_number);
-
-    if(
-      !isNaN(employeeNumber) &&
-      employeeNumber >= startNumber &&
-      employeeNumber > maxNumber
-    ){
-      maxNumber = employeeNumber;
-    }
-
-  });
-
-  numberInput.value = maxNumber + 1;
-}
-
-document.getElementById("employeeBranch")
-  ?.addEventListener("change", generateEmployeeNumber);
-</script>
 
 <div>
   <label>رقم الهاتف</label>
@@ -546,10 +426,8 @@ document.getElementById("employeeBranch")
 </div>
 
 <div>
-<label>الراتب الشهري</label>
-<input id="employeeSalary" type="number" step="0.01">
-</div>
-
+  <label>الراتب الشهري</label>
+  <input id="employeeSalary" type="number" step="0.01">
 </div>
 
 <input id="employeeId" type="hidden">
