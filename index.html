@@ -410,7 +410,7 @@ oninput="filterEmployees()">
 
 <div>
 <label>الفرع</label>
-<select id="employeeBranch">
+<select id="employeeBranch" onchange="generateEmployeeNumber()">
   <option value="">اختر الفرع</option>
 </select>
 </div>
@@ -1144,7 +1144,65 @@ status.textContent=
 /* =========================
    الموظف - إضافة وتعديل
 ========================= */
+async function generateEmployeeNumber(){
 
+  const branchId = document.getElementById("employeeBranch").value;
+  const numberInput = document.getElementById("employeeNumber");
+
+  if(!branchId){
+    numberInput.value = "";
+    return;
+  }
+
+  const { data: branch, error: branchError } = await supabaseClient
+    .from("branches")
+    .select("name")
+    .eq("id", Number(branchId))
+    .single();
+
+  if(branchError || !branch){
+    numberInput.value = "";
+    return;
+  }
+
+  const branchStarts = {
+    "بيست داي حراء": 101,
+    "لحظات البلد": 201,
+    "لحظات الزهراء": 301,
+    "لحظات حراء 1": 401,
+    "لحظات المروه": 501,
+    "بيست داي المحمدية": 601
+  };
+
+  const startNumber = branchStarts[branch.name];
+
+  if(!startNumber){
+    numberInput.value = "";
+    return;
+  }
+
+  const { data: employees, error } = await supabaseClient
+    .from("employees")
+    .select("employee_number")
+    .eq("branch_id", Number(branchId));
+
+  if(error){
+    numberInput.value = "";
+    return;
+  }
+
+  let nextNumber = startNumber;
+
+  const numbers = (employees || [])
+    .map(e => Number(e.employee_number))
+    .filter(n => Number.isFinite(n));
+
+  while(numbers.includes(nextNumber)){
+    nextNumber++;
+  }
+
+  numberInput.value = String(nextNumber);
+ }
 function openEmployeeModal(){
 
 document.getElementById("modalTitle").textContent="إضافة موظف";
