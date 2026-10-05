@@ -2075,7 +2075,7 @@ async function printEmployeeMonthlyReport(employeeId, month){
         <td>${esc(row.attendance_date || "")}</td>
         <td>${status}</td>
         <td>${esc(attendanceTypeName(row.attendance_type))}</td>
-        <td>${money(row.deduction_amount || 0)} جنيه</td>
+        <td>${money(row.deduction_amount || 0)} ${currencyName()}</td>
         <td>${esc(row.check_in || "-")}</td>
         <td>${esc(row.check_out || "-")}</td>
       </tr>
