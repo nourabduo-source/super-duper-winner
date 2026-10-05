@@ -410,7 +410,7 @@ oninput="filterEmployees()">
 
 <div>
 <label>الفرع</label>
-<select id="employeeBranch">
+<select id="employeeBranch" onchange="generateEmployeeNumber()">
   <option value="">اختر الفرع</option>
 </select>
 </div>
@@ -1144,7 +1144,55 @@ status.textContent=
 /* =========================
    الموظف - إضافة وتعديل
 ========================= */
+async function generateEmployeeNumber(){
 
+  const branchId = document.getElementById("employeeBranch").value;
+  const numberInput = document.getElementById("employeeNumber");
+
+  if(!branchId){
+    numberInput.value = "";
+    return;
+  }
+
+  const branchStarts = {
+    1: 101,
+    2: 201,
+    3: 301,
+    4: 401,
+    5: 501,
+    6: 601
+  };
+
+  const startNumber = branchStarts[Number(branchId)];
+
+  if(!startNumber){
+    numberInput.value = "";
+    return;
+  }
+
+  const { data, error } = await supabaseClient
+    .from("employees")
+    .select("employee_number")
+    .eq("branch_id", Number(branchId));
+
+  if(error){
+    console.error(error);
+    numberInput.value = "";
+    return;
+  }
+
+  const numbers = (data || [])
+    .map(e => Number(e.employee_number))
+    .filter(n => Number.isFinite(n));
+
+  let nextNumber = startNumber;
+
+  while(numbers.includes(nextNumber)){
+    nextNumber++;
+  }
+
+  numberInput.value = String(nextNumber);
+ }
 function openEmployeeModal(){
 
 document.getElementById("modalTitle").textContent="إضافة موظف";
