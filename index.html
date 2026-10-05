@@ -1164,7 +1164,9 @@ async function generateEmployeeNumber(){
   };
 
   const startNumber = branchStarts[Number(branchId)];
-
+ 
+alert("رقم الفرع هو: " + branchId);
+ 
   if(!startNumber){
     numberInput.value = "";
     return;
